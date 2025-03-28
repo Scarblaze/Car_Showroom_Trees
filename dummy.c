@@ -4,6 +4,7 @@
 #include<stdbool.h>
 
 #define ORDER 4
+#define MODELS 20
 
 typedef struct
 {
@@ -15,14 +16,6 @@ typedef struct
     char carType[10];
     bool isSold;
 } Car;
-
-typedef struct CarTreeNode {
-    int keys[ORDER-1];
-    Car car; 
-    struct BTreeNode *children_ptr[ORDER];
-    int numKeys; 
-    int leaf;    
-} CarTreeNode;
 
 typedef struct SoldCarTreeNode {
     int keys[ORDER-1];
@@ -84,5 +77,15 @@ typedef struct
     char car_model[20];
     int sold_cars;
     int available_cars;  
+} stock_details;
+
+typedef struct showroom
+{
+    int showroom_id;
+    SalesTreeNode* sales_root;
+    CustomerTreeNode* customer_root;
+    AvailbaleCarTreeNode* available_car_root;
+    SoldCarTreeNode* sold_car_root;
+    stock_details stock[MODELS];
 };
 
