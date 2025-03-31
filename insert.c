@@ -59,6 +59,25 @@ BTreeNode* search(BTreeNode* node, int key) {
         return node;
     }
     
+    if (isLeaf(node)) {
+        return NULL;
+    }
+    
+    return search(node->children[i], key);
+}
+
+BTreeNode* search(BTreeNode* node, int key) {
+    if (node == NULL) return NULL;
+    
+    int i = 0;
+    while (i < node->num_keys && key > node->keys[i]) {
+        i++;
+    }
+    
+    if (i < node->num_keys && key == node->keys[i]) {
+        return node;
+    }
+    
     if (node->is_leaf) {
         return NULL;
     }
