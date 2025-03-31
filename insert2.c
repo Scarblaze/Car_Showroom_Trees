@@ -10,7 +10,6 @@ typedef struct BTreeNode {
     int keys[MAX_KEYS];
     struct BTreeNode* children[ORDER];
     int num_keys;
-    bool is_leaf;
 } BTreeNode;
 
 bool isLeaf(BTreeNode* root)
@@ -20,10 +19,9 @@ bool isLeaf(BTreeNode* root)
     return ans;
 }
 
-BTreeNode* create_node(bool is_leaf) {
+BTreeNode* create_node() {
     BTreeNode* node = (BTreeNode*)malloc(sizeof(BTreeNode));
     node->num_keys = 0;
-    node->is_leaf = is_leaf;
     for (int i = 0; i < ORDER; i++) {
         node->children[i] = NULL;
     }
@@ -35,14 +33,14 @@ void traverse(BTreeNode* node) {
     
     int i;
     for (i = 0; i < node->num_keys; i++) {
-        if (!node->is_leaf) {
+        if (!isLeaf(node)) {
             traverse(node->children[i]);
         }
         printf("%d ", node->keys[i]);
     }
     
     // Traverse the last child
-    if (!node->is_leaf) {
+    if (!isLeaf(node)) {
         traverse(node->children[i]);
     }
 }
@@ -59,7 +57,7 @@ BTreeNode* search(BTreeNode* node, int key) {
         return node;
     }
     
-    if (node->is_leaf) {
+    if (isLeaf(node)) {
         return NULL;
     }
     
@@ -68,7 +66,7 @@ BTreeNode* search(BTreeNode* node, int key) {
 
 void split_child(BTreeNode* parent, int child_index) {
     BTreeNode* child = parent->children[child_index];
-    BTreeNode* new_child = create_node(child->is_leaf);
+    BTreeNode* new_child = create_node(isLeaf(child));
     int mid_index = MAX_KEYS/2;
 
     // Copy upper half of child to new_child
@@ -78,7 +76,7 @@ void split_child(BTreeNode* parent, int child_index) {
     }
 
     // Copy children if not leaf
-    if (!child->is_leaf) {
+    if (!isLeaf(child)) {
         for (int i = 0; i <= new_child->num_keys; i++) {
             new_child->children[i] = child->children[mid_index + 1 + i];
         }
@@ -102,7 +100,7 @@ void split_child(BTreeNode* parent, int child_index) {
 void insert_non_full(BTreeNode* node, int key) {
     int i = node->num_keys - 1;
 
-    if (node->is_leaf) {
+    if (isLeaf(node)) {
         // Shift keys and insert
         while (i >= 0 && key < node->keys[i]) {
             node->keys[i + 1] = node->keys[i];
@@ -154,7 +152,7 @@ void print_tree(BTreeNode* node, int level) {
     }
     printf("\n");
 
-    if (!node->is_leaf) {
+    if (!isLeaf(node)) {
         for (int i = 0; i <= node->num_keys; i++) {
             print_tree(node->children[i], level + 1);
         }
