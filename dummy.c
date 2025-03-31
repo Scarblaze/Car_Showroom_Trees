@@ -616,3 +616,133 @@ typedef struct showroom
     SoldCarTreeNode *sold_car_root;
     stock_details stock[MODELS];
 };
+
+void save_sold_cars(FILE *file, SoldCarTreeNode *node)
+{
+    if (node == NULL)
+    {
+        fprintf(file, "-1\n"); // Marker for NULL
+        return;
+    }
+
+    // Save number of keys
+    fprintf(file, "%d\n", node->num_keys);
+
+    // Save keys
+    for (int i = 0; i < node->num_keys; i++)
+    {
+        fprintf(file, "%d %s %s %lf %s %s %d %d\n",
+                node->keys[i].VIN,
+                node->keys[i].name,
+                node->keys[i].color,
+                node->keys[i].price,
+                node->keys[i].fuelType,
+                node->keys[i].carType,
+                node->keys[i].customer_id,
+                node->keys[i].salesperson_id);
+    }
+
+    // Recursively save children
+    for (int i = 0; i <= node->num_keys; i++)
+    {
+        save_sold_cars(file, node->children[i]);
+    }
+}
+
+// Load Sold Car Tree from File
+SoldCarTreeNode *load_sold_cars(FILE *file)
+{
+    int num_keys;
+    fscanf(file, "%d", &num_keys);
+
+    if (num_keys == -1)
+        return NULL;
+
+    SoldCarTreeNode *node = create_node_sold_car();
+    node->num_keys = num_keys;
+
+    // Load keys
+    for (int i = 0; i < num_keys; i++)
+    {
+        fscanf(file, "%d %s %s %lf %s %s %d %d",
+               &node->keys[i].VIN,
+               node->keys[i].name,
+               node->keys[i].color,
+               &node->keys[i].price,
+               node->keys[i].fuelType,
+               node->keys[i].carType,
+               &node->keys[i].customer_id,
+               &node->keys[i].salesperson_id);
+    }
+
+    // Recursively load children
+    for (int i = 0; i <= num_keys; i++)
+    {
+        node->children[i] = load_sold_cars(file);
+    }
+
+    return node;
+}
+
+// Save Available Car Tree to File
+void save_available_cars(FILE *file, AvailableCarTreeNode *node)
+{
+    if (node == NULL)
+    {
+        fprintf(file, "-1\n"); // Marker for NULL
+        return;
+    }
+
+    fprintf(file, "%d\n", node->num_keys);
+
+    for (int i = 0; i < node->num_keys; i++)
+    {
+        fprintf(file, "%d %s %s %lf %s %s %d %d\n",
+                node->keys[i].VIN,
+                node->keys[i].name,
+                node->keys[i].color,
+                node->keys[i].price,
+                node->keys[i].fuelType,
+                node->keys[i].carType,
+                node->keys[i].customer_id,
+                node->keys[i].salesperson_id);
+    }
+
+    for (int i = 0; i <= node->num_keys; i++)
+    {
+        save_available_cars(file, node->children[i]);
+    }
+}
+
+// Load Available Car Tree from File
+AvailableCarTreeNode *load_available_cars(FILE *file)
+{
+    int num_keys;
+    fscanf(file, "%d", &num_keys);
+
+    if (num_keys == -1)
+        return NULL;
+
+    AvailableCarTreeNode *node = create_node_available_car();
+    node->num_keys = num_keys;
+
+    for (int i = 0; i < num_keys; i++)
+    {
+        fscanf(file, "%d %s %s %lf %s %s %d %d",
+               &node->keys[i].VIN,
+               node->keys[i].name,
+               node->keys[i].color,
+               &node->keys[i].price,
+               node->keys[i].fuelType,
+               node->keys[i].carType,
+               &node->keys[i].customer_id,
+               &node->keys[i].salesperson_id);
+    }
+
+    for (int i = 0; i <= num_keys; i++)
+    {
+        node->children[i] = load_available_cars(file);
+    }
+
+    return node;
+}
