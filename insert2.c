@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 #define ORDER 5
 #define MAX_KEYS (ORDER - 1)
-#define MIN_KEYS (ORDER/2)
+#define MIN_KEYS (ceil(ORDER/2)-1)
 
 typedef struct BTreeNode {
     int keys[MAX_KEYS];
