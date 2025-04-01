@@ -8,6 +8,7 @@
 #define MIN_KEYS (ceil(ORDER / 2) - 1)
 #define MODELS 20
 
+//Car structure
 typedef struct
 {
     int VIN;
