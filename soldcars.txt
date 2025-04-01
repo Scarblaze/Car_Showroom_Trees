@@ -18,3 +18,4 @@
 1018 Jeep_Compass Red 27999.99 Petrol SUV 5018 3018
 1019 Chevrolet_Tahoe Black 50999.50 Diesel SUV 5019 3019
 1020 Mazda_MX5 Blue 27999.75 Petrol Convertible 5020 3020
+-1

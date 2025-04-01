@@ -18,3 +18,4 @@
 2018 Chevrolet_Bolt White 36999.50 Electric Hatchback 0 0
 2019 Honda_CRV Black 32999.99 Hybrid SUV 0 0
 2020 Nissan_Leaf Green 28999.75 Electric Hatchback 0 0
+-1
