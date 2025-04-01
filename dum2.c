@@ -89,6 +89,7 @@ typedef struct Showroom {
     AvailableCarTreeNode *available_car_root;
     SoldCarTreeNode *sold_car_root;
     StockDetails stock[MODELS];
+    Customer *customer_root;
 } Showroom;
 
 
@@ -608,3 +609,344 @@ void insert_sales_person(SalesTreeNode **root, SalesPerson key)
     insert_non_full_sales_person(*root, key);
 }
 
+// Function to save sold cars to file
+void save_sold_cars_to_file(SoldCarTreeNode *root, FILE *file) {
+    if (root == NULL) return;
+
+    int i;
+    for (i = 0; i < root->num_keys; i++) {
+        if (root->children[i] != NULL) {
+            save_sold_cars_to_file(root->children[i], file);
+        }
+        fprintf(file, "%d|%s|%s|%.2f|%s|%s|%d|%d|%s\n",
+                root->keys[i].VIN,
+                root->keys[i].name,
+                root->keys[i].color,
+                root->keys[i].price,
+                root->keys[i].fuelType,
+                root->keys[i].carType,
+                root->keys[i].customer_id,
+                root->keys[i].salesperson_id,
+                root->keys[i].soldDate);
+    }
+    if (root->children[i] != NULL) {
+        save_sold_cars_to_file(root->children[i], file);
+    }
+}
+
+// Function to load sold cars from file
+void load_sold_cars_from_file(SoldCarTreeNode **root, const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file %s\n", filename);
+        return;
+    }
+
+    char line[256];
+    // Skip header line
+    fgets(line, sizeof(line), file);
+    
+    while (fgets(line, sizeof(line), file)) {
+        Car car;
+        char *token = strtok(line, "|");
+        car.VIN = atoi(token);
+        
+        token = strtok(NULL, "|");
+        strcpy(car.name, token);
+        
+        token = strtok(NULL, "|");
+        strcpy(car.color, token);
+        
+        token = strtok(NULL, "|");
+        car.price = atof(token);
+        
+        token = strtok(NULL, "|");
+        strcpy(car.fuelType, token);
+        
+        token = strtok(NULL, "|");
+        strcpy(car.carType, token);
+        
+        token = strtok(NULL, "|");
+        car.customer_id = atoi(token);
+        
+        token = strtok(NULL, "|");
+        car.salesperson_id = atoi(token);
+        
+        token = strtok(NULL, "\n");
+        strcpy(car.soldDate, token);
+        
+        car.isSold = true;
+        
+        insert_sold_car(root, car);
+    }
+    fclose(file);
+}
+
+// Function to save available cars to file
+void save_available_cars_to_file(AvailableCarTreeNode *root, FILE *file) {
+    if (root == NULL) return;
+
+    int i;
+    for (i = 0; i < root->num_keys; i++) {
+        if (root->children[i] != NULL) {
+            save_available_cars_to_file(root->children[i], file);
+        }
+        fprintf(file, "%d|%s|%s|%.2f|%s|%s\n",
+                root->keys[i].VIN,
+                root->keys[i].name,
+                root->keys[i].color,
+                root->keys[i].price,
+                root->keys[i].fuelType,
+                root->keys[i].carType);
+    }
+    if (root->children[i] != NULL) {
+        save_available_cars_to_file(root->children[i], file);
+    }
+}
+
+// Function to load available cars from file
+void load_available_cars_from_file(AvailableCarTreeNode **root, const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file %s\n", filename);
+        return;
+    }
+
+    char line[256];
+    // Skip header line
+    fgets(line, sizeof(line), file);
+    
+    while (fgets(line, sizeof(line), file)) {
+        Car car;
+        char *token = strtok(line, "|");
+        car.VIN = atoi(token);
+        
+        token = strtok(NULL, "|");
+        strcpy(car.name, token);
+        
+        token = strtok(NULL, "|");
+        strcpy(car.color, token);
+        
+        token = strtok(NULL, "|");
+        car.price = atof(token);
+        
+        token = strtok(NULL, "|");
+        strcpy(car.fuelType, token);
+        
+        token = strtok(NULL, "\n");
+        strcpy(car.carType, token);
+        
+        car.isSold = false;
+        car.customer_id = -1;
+        car.salesperson_id = -1;
+        strcpy(car.soldDate, "");
+        
+        insert_available_car(root, car);
+    }
+    fclose(file);
+}
+
+// Function to save sales persons to file
+void save_sales_persons_to_file(SalesTreeNode *root, FILE *file) {
+    if (root == NULL) return;
+
+    int i;
+    for (i = 0; i < root->num_keys; i++) {
+        if (root->children[i] != NULL) {
+            save_sales_persons_to_file(root->children[i], file);
+        }
+        fprintf(file, "%d|%s|%.2f|%.2f|%.2f|%.2f\n",
+                root->keys[i].id,
+                root->keys[i].name,
+                root->keys[i].salesTarget,
+                root->keys[i].salesAchieved,
+                root->keys[i].totalSales,
+                root->keys[i].commission);
+    }
+    if (root->children[i] != NULL) {
+        save_sales_persons_to_file(root->children[i], file);
+    }
+}
+
+// Function to load sales persons from file
+void load_sales_persons_from_file(SalesTreeNode **root, const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file %s\n", filename);
+        return;
+    }
+
+    char line[256];
+    // Skip header line
+    fgets(line, sizeof(line), file);
+    
+    while (fgets(line, sizeof(line), file)) {
+        SalesPerson sp;
+        char *token = strtok(line, "|");
+        sp.id = atoi(token);
+        
+        token = strtok(NULL, "|");
+        strcpy(sp.name, token);
+        
+        token = strtok(NULL, "|");
+        sp.salesTarget = atof(token);
+        
+        token = strtok(NULL, "|");
+        sp.salesAchieved = atof(token);
+        
+        token = strtok(NULL, "|");
+        sp.totalSales = atof(token);
+        
+        token = strtok(NULL, "\n");
+        sp.commission = atof(token);
+        
+        sp.sold_car_root = NULL;
+        sp.customer_root = NULL;
+        
+        insert_sales_person(root, sp);
+    }
+    fclose(file);
+}
+
+// Function to save customers to file
+void save_customers_to_file(CustomerTreeNode *root, FILE *file) {
+    if (root == NULL) return;
+
+    int i;
+    for (i = 0; i < root->num_keys; i++) {
+        if (root->children[i] != NULL) {
+            save_customers_to_file(root->children[i], file);
+        }
+        fprintf(file, "%d|%s|%s|%s|%d|%s|%s|%.2f|%d|%.2f|%.2f|%.2f\n",
+                root->keys[i].id,
+                root->keys[i].name,
+                root->keys[i].mobile,
+                root->keys[i].address,
+                root->keys[i].soldCarVIN,
+                root->keys[i].registrationNumber,
+                root->keys[i].payment_type,
+                root->keys[i].downPayment,
+                root->keys[i].loanMonths,
+                root->keys[i].interestRate,
+                root->keys[i].monthlyEMI,
+                root->keys[i].loanAmount);
+    }
+    if (root->children[i] != NULL) {
+        save_customers_to_file(root->children[i], file);
+    }
+}
+
+// Function to load customers from file
+void load_customers_from_file(CustomerTreeNode **root, const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file %s\n", filename);
+        return;
+    }
+
+    char line[512];
+    // Skip header line
+    fgets(line, sizeof(line), file);
+    
+    while (fgets(line, sizeof(line), file)) {
+        Customer customer;
+        char *token = strtok(line, "|");
+        customer.id = atoi(token);
+        
+        token = strtok(NULL, "|");
+        strcpy(customer.name, token);
+        
+        token = strtok(NULL, "|");
+        strcpy(customer.mobile, token);
+        
+        token = strtok(NULL, "|");
+        strcpy(customer.address, token);
+        
+        token = strtok(NULL, "|");
+        customer.soldCarVIN = atoi(token);
+        
+        token = strtok(NULL, "|");
+        strcpy(customer.registrationNumber, token);
+        
+        token = strtok(NULL, "|");
+        strcpy(customer.payment_type, token);
+        
+        token = strtok(NULL, "|");
+        customer.downPayment = atof(token);
+        
+        token = strtok(NULL, "|");
+        customer.loanMonths = atoi(token);
+        
+        token = strtok(NULL, "|");
+        customer.interestRate = atof(token);
+        
+        token = strtok(NULL, "|");
+        customer.monthlyEMI = atof(token);
+        
+        token = strtok(NULL, "\n");
+        customer.loanAmount = atof(token);
+        
+        insert_customer(root, customer);
+    }
+    fclose(file);
+}
+
+// Function to save all showroom data to files
+void save_showroom_data(Showroom *showroom) {
+    FILE *file;
+    
+    // Save sold cars
+    file = fopen("sold_cars.txt", "w");
+    if (file == NULL) {
+        printf("Error opening sold_cars.txt for writing\n");
+        return;
+    }
+    fprintf(file, "VIN|name|color|price|fuelType|carType|customer_id|salesperson_id|soldDate\n");
+    save_sold_cars_to_file(showroom->sold_car_root, file);
+    fclose(file);
+    
+    // Save available cars
+    file = fopen("available_cars.txt", "w");
+    if (file == NULL) {
+        printf("Error opening available_cars.txt for writing\n");
+        return;
+    }
+    fprintf(file, "VIN|name|color|price|fuelType|carType\n");
+    save_available_cars_to_file(showroom->available_car_root, file);
+    fclose(file);
+    
+    // Save sales persons
+    file = fopen("sales_persons.txt", "w");
+    if (file == NULL) {
+        printf("Error opening sales_persons.txt for writing\n");
+        return;
+    }
+    fprintf(file, "id|name|salesTarget|salesAchieved|totalSales|commission\n");
+    save_sales_persons_to_file(showroom->sales_root, file);
+    fclose(file);
+    
+    // Save customers
+    file = fopen("customers.txt", "w");
+    if (file == NULL) {
+        printf("Error opening customers.txt for writing\n");
+        return;
+    }
+    fprintf(file, "id|name|mobile|address|soldCarVIN|registrationNumber|payment_type|downPayment|loanMonths|interestRate|monthlyEMI|loanAmount\n");
+    save_customers_to_file(showroom->customer_root, file);
+    fclose(file);
+}
+
+// Function to load all showroom data from files
+void load_showroom_data(Showroom *showroom) {
+    // Initialize all roots to NULL
+    showroom->available_car_root = NULL;
+    showroom->sold_car_root = NULL;
+    showroom->sales_root = NULL;
+    showroom->customer_root = NULL;
+    
+    // Load data from files
+    load_available_cars_from_file(&showroom->available_car_root, "available_cars.txt");
+    load_sold_cars_from_file(&showroom->sold_car_root, "sold_cars.txt");
+    load_sales_persons_from_file(&showroom->sales_root, "sales_persons.txt");
+    load_customers_from_file(&showroom->customer_root, "customers.txt");
+}

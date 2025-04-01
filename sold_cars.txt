@@ -1,0 +1,11 @@
+VIN|name|color|price|fuelType|carType|customer_id|salesperson_id|soldDate
+1001|Toyota Fortuner|White|3500000|Diesel|SUV|5001|101|2023-01-15
+1002|Hyundai Creta|Black|1500000|Petrol|SUV|5002|102|2023-02-20
+1003|Maruti Swift|Red|800000|Petrol|Hatchback|5003|103|2023-03-10
+1004|Honda City|Silver|1200000|Diesel|Sedan|5004|101|2023-04-05
+1005|Kia Seltos|Blue|1800000|Petrol|SUV|5005|102|2023-05-12
+1006|Tata Nexon|Orange|1100000|Diesel|SUV|5006|103|2023-06-18
+1007|Mahindra Thar|Black|1700000|Diesel|SUV|5007|101|2023-07-22
+1008|Toyota Innova|White|2500000|Diesel|SUV|5008|102|2023-08-30
+1009|Hyundai Verna|Grey|1300000|Petrol|Sedan|5009|103|2023-09-14
+1010|Maruti Baleno|Blue|900000|Petrol|Hatchback|5010|101|2023-10-25
