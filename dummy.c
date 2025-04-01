@@ -8,6 +8,14 @@
 #define MIN_KEYS (ceil(ORDER / 2) - 1)
 #define MODELS 20
 
+bool isLeaf(BTreeNode *root)
+{
+    bool ans = false;
+    if (root->children[0] == NULL)
+        ans = true;
+    return ans;
+}
+
 typedef struct
 {
     int VIN;
@@ -26,64 +34,6 @@ typedef struct SoldCarTreeNode
     struct SoldCarTreeNode *children[ORDER];
     int num_keys;
 } SoldCarTreeNode;
-
-typedef struct AvailableCarTreeNode
-{
-    Car keys[MAX_KEYS];
-    struct AvailableCarTreeNode *children[ORDER];
-    int num_keys;
-} AvailableCarTreeNode;
-
-typedef struct
-{
-    int id;
-    char name[50];
-    float salesTarget;
-    float salesAchieved;
-    float commission;
-} SalesPerson;
-
-typedef struct SalesTreeNode
-{
-    SalesPerson keys[MAX_KEYS];
-    struct SalesTreeNode *children[ORDER];
-    int num_keys;
-} SalesTreeNode;
-
-typedef struct
-{
-    int id;
-    char name[50];
-    char mobile[15];
-    char address[100];
-    int soldCarVIN;
-    char registrationNumber[20];
-    char payment_type[20];
-} Customer;
-
-typedef struct CustomerTreeNode
-{
-    Customer keys[MAX_KEYS];
-    struct CustomerTreeNode *children[ORDER];
-    int num_keys;
-} CustomerTreeNode;
-
-typedef struct
-{
-    char car_model[20];
-    int sold_cars;
-    int available_cars;
-} stock_details;
-
-typedef struct showroom
-{
-    int showroom_id;
-    SalesTreeNode *sales_root;
-    CustomerTreeNode *customer_root;
-    AvailableCarTreeNode *available_car_root;
-    SoldCarTreeNode *sold_car_root;
-    stock_details stock[MODELS];
-};
 
 SoldCarTreeNode *create_node_sold_car()
 {
@@ -214,6 +164,13 @@ void insert_sold_car(SoldCarTreeNode **root, Car key)
     insert_non_full_sold_car(*root, key);
 }
 
+typedef struct AvailableCarTreeNode
+{
+    Car keys[MAX_KEYS];
+    struct AvailableCarTreeNode *children[ORDER];
+    int num_keys;
+} AvailableCarTreeNode;
+
 SoldCarTreeNode *create_node_available_car()
 {
     AvailableCarTreeNode *node = (AvailableCarTreeNode *)malloc(sizeof(AvailableCarTreeNode));
@@ -342,6 +299,32 @@ void insert_available_car(AvailableCarTreeNode **root, Car key)
     }
     insert_non_full_available_car(*root, key);
 }
+
+// refrence
+typedef struct BTreeNode
+{
+    int keys[MAX_KEYS];
+    struct BTreeNode *children[ORDER];
+    int num_keys;
+} BTreeNode;
+
+typedef struct
+{
+    int id;
+    char name[50];
+    char mobile[15];
+    char address[100];
+    int soldCarVIN;
+    char registrationNumber[20];
+    char payment_type[20];
+} Customer;
+
+typedef struct CustomerTreeNode
+{
+    Customer keys[MAX_KEYS];
+    struct CustomerTreeNode *children[ORDER];
+    int num_keys;
+} CustomerTreeNode;
 
 CustomerTreeNode *create_node_customer()
 {
@@ -472,6 +455,25 @@ void insert_customer(CustomerTreeNode **root, Customer key)
     insert_non_full_customer(*root, key);
 }
 
+
+typedef struct
+{
+    int id;
+    char name[50];
+    float salesTarget;
+    float salesAchieved;
+    float commission;
+    SoldCarTreeNode *root;
+} SalesPerson;
+
+
+typedef struct SalesTreeNode
+{
+    SalesPerson keys[MAX_KEYS];
+    struct SalesTreeNode *children[ORDER];
+    int num_keys;
+} SalesTreeNode;
+
 SalesTreeNode *create_node_sales_person()
 {
     SalesTreeNode *node = (SalesTreeNode *)malloc(sizeof(SalesTreeNode));
@@ -600,6 +602,23 @@ void insert_sales_person(SalesTreeNode **root, SalesPerson key)
     }
     insert_non_full_sales_person(*root, key);
 }
+
+typedef struct
+{
+    char car_model[20];
+    int sold_cars;
+    int available_cars;
+} stock_details;
+
+typedef struct showroom
+{
+    int showroom_id;
+    SalesTreeNode *sales_root;
+    CustomerTreeNode *customer_root;
+    AvailableCarTreeNode *available_car_root;
+    SoldCarTreeNode *sold_car_root;
+    stock_details stock[MODELS];
+};
 
 void save_sold_cars(FILE *file, SoldCarTreeNode *node)
 {
