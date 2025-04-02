@@ -36,6 +36,17 @@ typedef struct AvailableCarTreeNode {
     int num_keys;
 } AvailableCarTreeNode;
 
+typedef struct {
+    Car car;
+    int showroom_id;
+} MergedCar;
+
+typedef struct MergedCarTreeNode {
+    MergedCar keys[MAX_KEYS];
+    struct MergedCarTreeNode *children[ORDER];
+    int num_keys;
+} MergedCarTreeNode;
+
 // Customer structure with loan details
 typedef struct {
     int id;
@@ -777,6 +788,149 @@ void load_showroom_data(Showroom *showroom, int showroom_num) {
     }
 }
 
+MergedCarTreeNode *create_node_merged_car() {
+    MergedCarTreeNode *node = (MergedCarTreeNode *)malloc(sizeof(MergedCarTreeNode));
+    node->num_keys = 0;
+    for (int i = 0; i < ORDER; i++) {
+        node->children[i] = NULL;
+    }
+    return node;
+}
+
+void split_child_merged_car(MergedCarTreeNode *parent, int child_index) {
+    MergedCarTreeNode *child = parent->children[child_index];
+    MergedCarTreeNode *new_child = create_node_merged_car();
+    int mid_index = MAX_KEYS / 2;
+
+    new_child->num_keys = MAX_KEYS - mid_index - 1;
+    for (int i = 0; i < new_child->num_keys; i++) {
+        new_child->keys[i] = child->keys[mid_index + 1 + i];
+    }
+    if (child->children[0] != NULL) {
+        for (int i = 0; i <= new_child->num_keys; i++) {
+            new_child->children[i] = child->children[mid_index + 1 + i];
+        }
+    }
+    child->num_keys = mid_index;
+
+    for (int i = parent->num_keys; i > child_index; i--) {
+        parent->children[i + 1] = parent->children[i];
+        parent->keys[i] = parent->keys[i - 1];
+    }
+    parent->children[child_index + 1] = new_child;
+    parent->keys[child_index] = child->keys[mid_index];
+    parent->num_keys++;
+}
+
+void insert_non_full_merged_car(MergedCarTreeNode *node, MergedCar key) {
+    int i = node->num_keys - 1;
+    // Since we sort by VIN, compare key.car.VIN.
+    if (node->children[0] == NULL) {
+        while (i >= 0 && key.car.VIN < node->keys[i].car.VIN) {
+            node->keys[i + 1] = node->keys[i];
+            i--;
+        }
+        node->keys[i + 1] = key;
+        node->num_keys++;
+    } else {
+        while (i >= 0 && key.car.VIN < node->keys[i].car.VIN) {
+            i--;
+        }
+        i++;
+        if (node->children[i]->num_keys == MAX_KEYS) {
+            split_child_merged_car(node, i);
+            if (key.car.VIN > node->keys[i].car.VIN) {
+                i++;
+            }
+        }
+        insert_non_full_merged_car(node->children[i], key);
+    }
+}
+
+void insert_merged_car(MergedCarTreeNode **root, MergedCar key) {
+    if (*root == NULL) {
+        *root = create_node_merged_car();
+        (*root)->keys[0] = key;
+        (*root)->num_keys = 1;
+        return;
+    }
+    if ((*root)->num_keys == MAX_KEYS) {
+        MergedCarTreeNode *new_root = create_node_merged_car();
+        new_root->children[0] = *root;
+        split_child_merged_car(new_root, 0);
+        *root = new_root;
+    }
+    insert_non_full_merged_car(*root, key);
+}
+
+void traverse_merged_car(MergedCarTreeNode *node) {
+    if (node == NULL)
+        return;
+    int i;
+    for (i = 0; i < node->num_keys; i++) {
+        if (node->children[0] != NULL)
+            traverse_merged_car(node->children[i]);
+        // Print VIN, model (name), showroom number, and isSold flag.
+        printf("VIN: %d, Name: %s, Showroom: %d, isSold: %s\n",
+               node->keys[i].car.VIN,
+               node->keys[i].car.name,
+               node->keys[i].showroom_id,
+               node->keys[i].car.isSold ? "true" : "false");
+    }
+    if (node->children[0] != NULL)
+        traverse_merged_car(node->children[i]);
+}
+
+// --- Helper callback functions to merge cars ---
+// These functions traverse an existing B-Tree (available or sold) and insert each car into the merged tree.
+// They take the showroom_id as an extra parameter.
+
+void traverse_available_car_for_merge(AvailableCarTreeNode *node, int showroom_id, MergedCarTreeNode **mergedRoot) {
+    if (node == NULL)
+        return;
+    int i;
+    for (i = 0; i < node->num_keys; i++) {
+        if (node->children[0] != NULL)
+            traverse_available_car_for_merge(node->children[i], showroom_id, mergedRoot);
+        MergedCar mcar;
+        mcar.car = node->keys[i];
+        mcar.showroom_id = showroom_id;
+        insert_merged_car(mergedRoot, mcar);
+    }
+    if (node->children[0] != NULL)
+        traverse_available_car_for_merge(node->children[i], showroom_id, mergedRoot);
+}
+
+void traverse_sold_car_for_merge(SoldCarTreeNode *node, int showroom_id, MergedCarTreeNode **mergedRoot) {
+    if (node == NULL)
+        return;
+    int i;
+    for (i = 0; i < node->num_keys; i++) {
+        if (node->children[0] != NULL)
+            traverse_sold_car_for_merge(node->children[i], showroom_id, mergedRoot);
+        MergedCar mcar;
+        mcar.car = node->keys[i];
+        mcar.showroom_id = showroom_id;
+        insert_merged_car(mergedRoot, mcar);
+    }
+    if (node->children[0] != NULL)
+        traverse_sold_car_for_merge(node->children[i], showroom_id, mergedRoot);
+}
+
+// --- Merge function ---
+// This function goes through each showroom's available and sold trees
+// and inserts every car into a new merged B-Tree.
+MergedCarTreeNode *merge_showrooms(Showroom showrooms[], int numShowrooms) {
+    MergedCarTreeNode *mergedRoot = NULL;
+    for (int i = 0; i < numShowrooms; i++) {
+        // Merge available cars from showroom i
+        traverse_available_car_for_merge(showrooms[i].available_car_root, showrooms[i].showroom_id, &mergedRoot);
+        // Merge sold cars from showroom i
+        traverse_sold_car_for_merge(showrooms[i].sold_car_root, showrooms[i].showroom_id, &mergedRoot);
+    }
+    return mergedRoot;
+}
+
 // Example usage in main()
 int main() {
     Showroom showrooms[3];
@@ -796,6 +950,10 @@ int main() {
         traverse_customer(showrooms[i].customer_root);
         printf("\n");
     }
-    
+    MergedCarTreeNode *mergedRoot = merge_showrooms(showrooms, 3);
+
+    // Traverse the merged B-Tree and display VIN, model name, showroom number, and isSold flag.
+    printf("\n--- Merged Car Data ---\n");
+    traverse_merged_car(mergedRoot);
     return 0;
 }
