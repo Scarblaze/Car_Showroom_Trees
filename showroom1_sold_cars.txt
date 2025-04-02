@@ -1,11 +1,11 @@
 VIN|name|color|price|fuelType|carType|customer_id|salesperson_id|soldDate
-2021|Safari|Blue|1950000|Diesel|SUV|521|101|2024-09-30
-2022|Alcazar|Grey|1850000|Petrol|SUV|522|102|2024-10-05
-2023|Sonet|Red|950000|Diesel|SUV|523|103|2024-11-19
-2024|Magnite|Yellow|800000|Petrol|SUV|524|104|2024-12-24
-2025|Kiger|White|750000|Petrol|SUV|525|105|2025-01-07
-2026|Amaze|Silver|900000|Diesel|Sedan|526|106|2025-02-14
-2027|Dzire|Black|750000|Petrol|Sedan|527|107|2025-03-08
-2028|WagonR|Blue|600000|Petrol|Hatchback|528|108|2025-04-22
-2029|Ignis|Green|700000|Petrol|Hatchback|529|109|2025-05-15
-2030|Jimny|Red|1500000|Petrol|SUV|530|110|2025-06-30
+2011|Innova Crysta|White|2500000|Diesel|SUV|511|121|2023-11-05
+2012|Fortuner|Black|3500000|Diesel|SUV|512|122|2023-12-12
+2013|Creta|Silver|1500000|Petrol|SUV|513|123|2024-01-08
+2014|Seltos|Grey|1450000|Diesel|SUV|514|124|2024-02-14
+2015|Verna|Blue|1300000|Petrol|Sedan|515|125|2024-03-21
+2016|City|Red|1250000|Diesel|Sedan|516|126|2024-04-03
+2017|Thar|Orange|1700000|Diesel|SUV|517|127|2024-05-17
+2018|Scorpio|Black|1800000|Diesel|SUV|518|128|2024-06-09
+2019|XUV700|White|2200000|Petrol|SUV|519|129|2024-07-25
+2020|Harrier|Brown|1900000|Diesel|SUV|520|130|2024-08-11
