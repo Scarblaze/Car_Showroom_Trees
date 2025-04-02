@@ -76,7 +76,6 @@ typedef struct SalesTreeNode {
     int num_keys;
 } SalesTreeNode;
 
-
 typedef struct {
     char car_model[20];
     int sold_cars;
@@ -91,7 +90,6 @@ typedef struct Showroom {
     StockDetails stock[MODELS];
     Customer *customer_root;
 } Showroom;
-
 
 SoldCarTreeNode *create_node_sold_car()
 {
@@ -168,7 +166,7 @@ void insert_non_full_sold_car(SoldCarTreeNode *node, Car key)
 {
     int i = node->num_keys - 1;
 
-    // leaf
+    // Leaf node case
     if (node->children[0] == NULL)
     {
         // Shift keys and insert
@@ -187,7 +185,7 @@ void insert_non_full_sold_car(SoldCarTreeNode *node, Car key)
         {
             i--;
         }
-        i++; // because you have to go to child. i was key index until now
+        i++; // now i is the child index
 
         // Split if child is full
         if (node->children[i]->num_keys == MAX_KEYS)
@@ -222,7 +220,7 @@ void insert_sold_car(SoldCarTreeNode **root, Car key)
     insert_non_full_sold_car(*root, key);
 }
 
-SoldCarTreeNode *create_node_available_car()
+AvailableCarTreeNode *create_node_available_car()
 {
     AvailableCarTreeNode *node = (AvailableCarTreeNode *)malloc(sizeof(AvailableCarTreeNode));
     node->num_keys = 0;
@@ -297,7 +295,7 @@ void insert_non_full_available_car(AvailableCarTreeNode *node, Car key)
 {
     int i = node->num_keys - 1;
 
-    // leaf
+    // Leaf node case
     if (node->children[0] == NULL)
     {
         // Shift keys and insert
@@ -316,7 +314,7 @@ void insert_non_full_available_car(AvailableCarTreeNode *node, Car key)
         {
             i--;
         }
-        i++; // because you have to go to child. i was key index until now
+        i++; // now i is the child index
 
         // Split if child is full
         if (node->children[i]->num_keys == MAX_KEYS)
@@ -426,7 +424,7 @@ void insert_non_full_customer(CustomerTreeNode *node, Customer key)
 {
     int i = node->num_keys - 1;
 
-    // leaf
+    // Leaf node case
     if (node->children[0] == NULL)
     {
         // Shift keys and insert
@@ -445,7 +443,7 @@ void insert_non_full_customer(CustomerTreeNode *node, Customer key)
         {
             i--;
         }
-        i++; // because you have to go to child. i was key index until now
+        i++; // now i is the child index
 
         // Split if child is full
         if (node->children[i]->num_keys == MAX_KEYS)
@@ -555,7 +553,7 @@ void insert_non_full_sales_person(SalesTreeNode *node, SalesPerson key)
 {
     int i = node->num_keys - 1;
 
-    // leaf
+    // Leaf node case
     if (node->children[0] == NULL)
     {
         // Shift keys and insert
@@ -574,7 +572,7 @@ void insert_non_full_sales_person(SalesTreeNode *node, SalesPerson key)
         {
             i--;
         }
-        i++; // because you have to go to child. i was key index until now
+        i++; // now i is the child index
 
         // Split if child is full
         if (node->children[i]->num_keys == MAX_KEYS)
@@ -621,7 +619,7 @@ void load_available_cars_from_file(AvailableCarTreeNode **root, const char *file
     // Skip header line
     fgets(line, sizeof(line), file);
     
-    while (fgets(line, sizeof(line), file) {
+    while (fgets(line, sizeof(line), file)) {  // Corrected closing parenthesis
         Car car;
         char *token = strtok(line, "|");
         car.VIN = atoi(token);
@@ -664,7 +662,7 @@ void load_sold_cars_from_file(SoldCarTreeNode **root, const char *filename) {
     // Skip header line
     fgets(line, sizeof(line), file);
     
-    while (fgets(line, sizeof(line), file) {
+    while (fgets(line, sizeof(line), file)) {  // Corrected closing parenthesis
         Car car;
         char *token = strtok(line, "|");
         car.VIN = atoi(token);
@@ -712,7 +710,7 @@ void load_sales_persons_from_file(SalesTreeNode **root, const char *filename) {
     // Skip header line
     fgets(line, sizeof(line), file);
     
-    while (fgets(line, sizeof(line), file) {
+    while (fgets(line, sizeof(line), file)) {  // Corrected closing parenthesis
         SalesPerson sp;
         char *token = strtok(line, "|");
         sp.id = atoi(token);
@@ -753,7 +751,7 @@ void load_customers_from_file(CustomerTreeNode **root, const char *filename) {
     // Skip header line
     fgets(line, sizeof(line), file);
     
-    while (fgets(line, sizeof(line), file)) {
+    while (fgets(line, sizeof(line), file)) {  // Corrected closing parenthesis
         Customer customer;
         char *token = strtok(line, "|");
         customer.id = atoi(token);
@@ -822,7 +820,7 @@ void load_showroom_data(Showroom *showroom, int showroom_num) {
     snprintf(filename, sizeof(filename), "showroom%d_customers.txt", showroom_num);
     load_customers_from_file(&showroom->customer_root, filename);
     
-    // Initialize stock details (you may want to load this from file too)
+    // Initialize stock details (this can be extended to load from file if needed)
     for (int i = 0; i < MODELS; i++) {
         strcpy(showroom->stock[i].car_model, "");
         showroom->stock[i].sold_cars = 0;
