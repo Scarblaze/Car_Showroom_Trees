@@ -93,6 +93,11 @@ typedef struct {
     int available_cars;
 } StockDetails;
 
+typedef struct {
+    char model[50];
+    int count;
+} ModelCount;
+
 // Updated: customer_root is now of type CustomerTreeNode *
 typedef struct Showroom {
     int showroom_id;
@@ -931,6 +936,61 @@ MergedCarTreeNode *merge_showrooms(Showroom showrooms[], int numShowrooms) {
     return mergedRoot;
 }
 
+
+
+// Function to update the count for a given model name.
+void update_model_count(ModelCount models[], int *numModels, const char *modelName) {
+    for (int i = 0; i < *numModels; i++) {
+        if (strcmp(models[i].model, modelName) == 0) {
+            models[i].count++;
+            return;
+        }
+    }
+    // Not found: add a new entry
+    strcpy(models[*numModels].model, modelName);
+    models[*numModels].count = 1;
+    (*numModels)++;
+}
+
+// Recursively traverse the merged B-Tree and update counts for sold cars.
+void traverse_and_count_merged(MergedCarTreeNode *node, ModelCount models[], int *numModels) {
+    if (node == NULL)
+        return;
+    
+    int i;
+    for (i = 0; i < node->num_keys; i++) {
+        if (node->children[0] != NULL)
+            traverse_and_count_merged(node->children[i], models, numModels);
+        
+        // Only count sold cars.
+        if (node->keys[i].car.isSold) {
+            update_model_count(models, numModels, node->keys[i].car.name);
+        }
+    }
+    if (node->children[0] != NULL)
+        traverse_and_count_merged(node->children[i], models, numModels);
+}
+
+void find_most_popular_car_model(MergedCarTreeNode *mergedRoot) {
+    ModelCount models[MODELS];
+    int numModels = 0;
+    traverse_and_count_merged(mergedRoot, models, &numModels);
+    
+    if (numModels == 0) {
+        printf("No sold car records found.\n");
+        return;
+    }
+    
+    // Find the model with the maximum count.
+    int maxIndex = 0;
+    for (int i = 1; i < numModels; i++) {
+        if (models[i].count > models[maxIndex].count)
+            maxIndex = i;
+    }
+    
+    printf("\nMost Popular Car Model: %s (Sold %d times)\n", models[maxIndex].model, models[maxIndex].count);
+}
+
 // Example usage in main()
 int main() {
     Showroom showrooms[3];
@@ -955,5 +1015,8 @@ int main() {
     // Traverse the merged B-Tree and display VIN, model name, showroom number, and isSold flag.
     printf("\n--- Merged Car Data ---\n");
     traverse_merged_car(mergedRoot);
+
+    find_most_popular_car_model(mergedRoot);
+
     return 0;
 }
