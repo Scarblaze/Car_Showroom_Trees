@@ -82,13 +82,14 @@ typedef struct {
     int available_cars;
 } StockDetails;
 
+// Updated: customer_root is now of type CustomerTreeNode *
 typedef struct Showroom {
     int showroom_id;
     SalesTreeNode *sales_root;
     AvailableCarTreeNode *available_car_root;
     SoldCarTreeNode *sold_car_root;
     StockDetails stock[MODELS];
-    Customer *customer_root;
+    CustomerTreeNode *customer_root;
 } Showroom;
 
 SoldCarTreeNode *create_node_sold_car()
@@ -117,7 +118,6 @@ void traverse_sold_car(SoldCarTreeNode *node)
         printf("%d ", node->keys[i].VIN);
     }
 
-    // Traverse the last child
     if (node->children[0])
     {
         traverse_sold_car(node->children[i]);
@@ -130,14 +130,12 @@ void split_child_sold_car(SoldCarTreeNode *parent, int child_index)
     SoldCarTreeNode *new_child = create_node_sold_car();
     int mid_index = MAX_KEYS / 2;
 
-    // Copy upper half of child to new_child
     new_child->num_keys = MAX_KEYS - mid_index - 1;
     for (int i = 0; i < new_child->num_keys; i++)
     {
         new_child->keys[i] = child->keys[mid_index + 1 + i];
     }
 
-    // Copy children if not leaf
     if (child->children[0])
     {
         for (int i = 0; i <= new_child->num_keys; i++)
@@ -146,17 +144,14 @@ void split_child_sold_car(SoldCarTreeNode *parent, int child_index)
         }
     }
 
-    // Reduce keys in original child
     child->num_keys = mid_index;
 
-    // Make space in parent for new child
     for (int i = parent->num_keys; i > child_index; i--)
     {
         parent->children[i + 1] = parent->children[i];
         parent->keys[i] = parent->keys[i - 1];
     }
 
-    // Move middle key to parent and link new child
     parent->children[child_index + 1] = new_child;
     parent->keys[child_index] = child->keys[mid_index];
     parent->num_keys++;
@@ -166,10 +161,8 @@ void insert_non_full_sold_car(SoldCarTreeNode *node, Car key)
 {
     int i = node->num_keys - 1;
 
-    // Leaf node case
     if (node->children[0] == NULL)
     {
-        // Shift keys and insert
         while (i >= 0 && key.VIN < node->keys[i].VIN)
         {
             node->keys[i + 1] = node->keys[i];
@@ -180,14 +173,12 @@ void insert_non_full_sold_car(SoldCarTreeNode *node, Car key)
     }
     else
     {
-        // Find child to insert into
         while (i >= 0 && key.VIN < node->keys[i].VIN)
         {
             i--;
         }
-        i++; // now i is the child index
+        i++;
 
-        // Split if child is full
         if (node->children[i]->num_keys == MAX_KEYS)
         {
             split_child_sold_car(node, i);
@@ -246,7 +237,6 @@ void traverse_available_car(AvailableCarTreeNode *node)
         printf("%d ", node->keys[i].VIN);
     }
 
-    // Traverse the last child
     if (node->children[0])
     {
         traverse_available_car(node->children[i]);
@@ -259,14 +249,12 @@ void split_child_available_car(AvailableCarTreeNode *parent, int child_index)
     AvailableCarTreeNode *new_child = create_node_available_car();
     int mid_index = MAX_KEYS / 2;
 
-    // Copy upper half of child to new_child
     new_child->num_keys = MAX_KEYS - mid_index - 1;
     for (int i = 0; i < new_child->num_keys; i++)
     {
         new_child->keys[i] = child->keys[mid_index + 1 + i];
     }
 
-    // Copy children if not leaf
     if (child->children[0])
     {
         for (int i = 0; i <= new_child->num_keys; i++)
@@ -275,17 +263,14 @@ void split_child_available_car(AvailableCarTreeNode *parent, int child_index)
         }
     }
 
-    // Reduce keys in original child
     child->num_keys = mid_index;
 
-    // Make space in parent for new child
     for (int i = parent->num_keys; i > child_index; i--)
     {
         parent->children[i + 1] = parent->children[i];
         parent->keys[i] = parent->keys[i - 1];
     }
 
-    // Move middle key to parent and link new child
     parent->children[child_index + 1] = new_child;
     parent->keys[child_index] = child->keys[mid_index];
     parent->num_keys++;
@@ -295,10 +280,8 @@ void insert_non_full_available_car(AvailableCarTreeNode *node, Car key)
 {
     int i = node->num_keys - 1;
 
-    // Leaf node case
     if (node->children[0] == NULL)
     {
-        // Shift keys and insert
         while (i >= 0 && key.VIN < node->keys[i].VIN)
         {
             node->keys[i + 1] = node->keys[i];
@@ -309,14 +292,12 @@ void insert_non_full_available_car(AvailableCarTreeNode *node, Car key)
     }
     else
     {
-        // Find child to insert into
         while (i >= 0 && key.VIN < node->keys[i].VIN)
         {
             i--;
         }
-        i++; // now i is the child index
+        i++;
 
-        // Split if child is full
         if (node->children[i]->num_keys == MAX_KEYS)
         {
             split_child_available_car(node, i);
@@ -375,7 +356,6 @@ void traverse_customer(CustomerTreeNode *node)
         printf("%d ", node->keys[i].id);
     }
 
-    // Traverse the last child
     if (node->children[0])
     {
         traverse_customer(node->children[i]);
@@ -388,14 +368,12 @@ void split_child_customer(CustomerTreeNode *parent, int child_index)
     CustomerTreeNode *new_child = create_node_customer();
     int mid_index = MAX_KEYS / 2;
 
-    // Copy upper half of child to new_child
     new_child->num_keys = MAX_KEYS - mid_index - 1;
     for (int i = 0; i < new_child->num_keys; i++)
     {
         new_child->keys[i] = child->keys[mid_index + 1 + i];
     }
 
-    // Copy children if not leaf
     if (child->children[0])
     {
         for (int i = 0; i <= new_child->num_keys; i++)
@@ -404,17 +382,14 @@ void split_child_customer(CustomerTreeNode *parent, int child_index)
         }
     }
 
-    // Reduce keys in original child
     child->num_keys = mid_index;
 
-    // Make space in parent for new child
     for (int i = parent->num_keys; i > child_index; i--)
     {
         parent->children[i + 1] = parent->children[i];
         parent->keys[i] = parent->keys[i - 1];
     }
 
-    // Move middle key to parent and link new child
     parent->children[child_index + 1] = new_child;
     parent->keys[child_index] = child->keys[mid_index];
     parent->num_keys++;
@@ -424,10 +399,8 @@ void insert_non_full_customer(CustomerTreeNode *node, Customer key)
 {
     int i = node->num_keys - 1;
 
-    // Leaf node case
     if (node->children[0] == NULL)
     {
-        // Shift keys and insert
         while (i >= 0 && key.id < node->keys[i].id)
         {
             node->keys[i + 1] = node->keys[i];
@@ -438,14 +411,12 @@ void insert_non_full_customer(CustomerTreeNode *node, Customer key)
     }
     else
     {
-        // Find child to insert into
         while (i >= 0 && key.id < node->keys[i].id)
         {
             i--;
         }
-        i++; // now i is the child index
+        i++;
 
-        // Split if child is full
         if (node->children[i]->num_keys == MAX_KEYS)
         {
             split_child_customer(node, i);
@@ -504,7 +475,6 @@ void traverse_sales_person(SalesTreeNode *node)
         printf("%d ", node->keys[i].id);
     }
 
-    // Traverse the last child
     if (node->children[0])
     {
         traverse_sales_person(node->children[i]);
@@ -517,14 +487,12 @@ void split_child_sales_person(SalesTreeNode *parent, int child_index)
     SalesTreeNode *new_child = create_node_sales_person();
     int mid_index = MAX_KEYS / 2;
 
-    // Copy upper half of child to new_child
     new_child->num_keys = MAX_KEYS - mid_index - 1;
     for (int i = 0; i < new_child->num_keys; i++)
     {
         new_child->keys[i] = child->keys[mid_index + 1 + i];
     }
 
-    // Copy children if not leaf
     if (child->children[0])
     {
         for (int i = 0; i <= new_child->num_keys; i++)
@@ -533,17 +501,14 @@ void split_child_sales_person(SalesTreeNode *parent, int child_index)
         }
     }
 
-    // Reduce keys in original child
     child->num_keys = mid_index;
 
-    // Make space in parent for new child
     for (int i = parent->num_keys; i > child_index; i--)
     {
         parent->children[i + 1] = parent->children[i];
         parent->keys[i] = parent->keys[i - 1];
     }
 
-    // Move middle key to parent and link new child
     parent->children[child_index + 1] = new_child;
     parent->keys[child_index] = child->keys[mid_index];
     parent->num_keys++;
@@ -553,10 +518,8 @@ void insert_non_full_sales_person(SalesTreeNode *node, SalesPerson key)
 {
     int i = node->num_keys - 1;
 
-    // Leaf node case
     if (node->children[0] == NULL)
     {
-        // Shift keys and insert
         while (i >= 0 && key.id < node->keys[i].id)
         {
             node->keys[i + 1] = node->keys[i];
@@ -567,14 +530,12 @@ void insert_non_full_sales_person(SalesTreeNode *node, SalesPerson key)
     }
     else
     {
-        // Find child to insert into
         while (i >= 0 && key.id < node->keys[i].id)
         {
             i--;
         }
-        i++; // now i is the child index
+        i++;
 
-        // Split if child is full
         if (node->children[i]->num_keys == MAX_KEYS)
         {
             split_child_sales_person(node, i);
@@ -616,10 +577,9 @@ void load_available_cars_from_file(AvailableCarTreeNode **root, const char *file
     }
 
     char line[256];
-    // Skip header line
     fgets(line, sizeof(line), file);
     
-    while (fgets(line, sizeof(line), file)) {  // Corrected closing parenthesis
+    while (fgets(line, sizeof(line), file)) {
         Car car;
         char *token = strtok(line, "|");
         car.VIN = atoi(token);
@@ -639,7 +599,6 @@ void load_available_cars_from_file(AvailableCarTreeNode **root, const char *file
         token = strtok(NULL, "\n");
         strcpy(car.carType, token);
         
-        // Set default values for unsold cars
         car.isSold = false;
         car.customer_id = -1;
         car.salesperson_id = -1;
@@ -659,10 +618,9 @@ void load_sold_cars_from_file(SoldCarTreeNode **root, const char *filename) {
     }
 
     char line[256];
-    // Skip header line
     fgets(line, sizeof(line), file);
     
-    while (fgets(line, sizeof(line), file)) {  // Corrected closing parenthesis
+    while (fgets(line, sizeof(line), file)) {
         Car car;
         char *token = strtok(line, "|");
         car.VIN = atoi(token);
@@ -707,10 +665,9 @@ void load_sales_persons_from_file(SalesTreeNode **root, const char *filename) {
     }
 
     char line[256];
-    // Skip header line
     fgets(line, sizeof(line), file);
     
-    while (fgets(line, sizeof(line), file)) {  // Corrected closing parenthesis
+    while (fgets(line, sizeof(line), file)) {
         SalesPerson sp;
         char *token = strtok(line, "|");
         sp.id = atoi(token);
@@ -730,7 +687,6 @@ void load_sales_persons_from_file(SalesTreeNode **root, const char *filename) {
         token = strtok(NULL, "\n");
         sp.commission = atof(token);
         
-        // Initialize tree pointers
         sp.sold_car_root = NULL;
         sp.customer_root = NULL;
         
@@ -748,10 +704,9 @@ void load_customers_from_file(CustomerTreeNode **root, const char *filename) {
     }
 
     char line[512];
-    // Skip header line
     fgets(line, sizeof(line), file);
     
-    while (fgets(line, sizeof(line), file)) {  // Corrected closing parenthesis
+    while (fgets(line, sizeof(line), file)) {
         Customer customer;
         char *token = strtok(line, "|");
         customer.id = atoi(token);
@@ -798,29 +753,23 @@ void load_customers_from_file(CustomerTreeNode **root, const char *filename) {
 void load_showroom_data(Showroom *showroom, int showroom_num) {
     char filename[50];
     
-    // Initialize all roots to NULL
     showroom->available_car_root = NULL;
     showroom->sold_car_root = NULL;
     showroom->sales_root = NULL;
     showroom->customer_root = NULL;
     
-    // Load available cars
     snprintf(filename, sizeof(filename), "showroom%d_available_cars.txt", showroom_num);
     load_available_cars_from_file(&showroom->available_car_root, filename);
     
-    // Load sold cars
     snprintf(filename, sizeof(filename), "showroom%d_sold_cars.txt", showroom_num);
     load_sold_cars_from_file(&showroom->sold_car_root, filename);
     
-    // Load sales persons
     snprintf(filename, sizeof(filename), "showroom%d_salesperson.txt", showroom_num);
     load_sales_persons_from_file(&showroom->sales_root, filename);
     
-    // Load customers
     snprintf(filename, sizeof(filename), "showroom%d_customers.txt", showroom_num);
     load_customers_from_file(&showroom->customer_root, filename);
     
-    // Initialize stock details (this can be extended to load from file if needed)
     for (int i = 0; i < MODELS; i++) {
         strcpy(showroom->stock[i].car_model, "");
         showroom->stock[i].sold_cars = 0;
@@ -832,12 +781,10 @@ void load_showroom_data(Showroom *showroom, int showroom_num) {
 int main() {
     Showroom showrooms[3];
     
-    // Load data for all three showrooms
     for (int i = 0; i < 3; i++) {
         showrooms[i].showroom_id = i + 1;
         load_showroom_data(&showrooms[i], i + 1);
         
-        // Print loaded data
         printf("\n=== Showroom %d ===\n", i + 1);
         printf("Available Cars (VINs): ");
         traverse_available_car(showrooms[i].available_car_root);
