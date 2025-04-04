@@ -991,49 +991,54 @@ void find_most_popular_car_model(MergedCarTreeNode *mergedRoot) {
     printf("\nMost Popular Car Model: %s (Sold %d times)\n", models[maxIndex].model, models[maxIndex].count);
 }
 
-// Function to find the best salesperson in a SalesTreeNode (B-Tree)
-// It recursively traverses the tree and returns a SalesPerson with the highest salesAchieved.
-SalesPerson find_top_in_sales_tree(SalesTreeNode *node) {
-    SalesPerson bestCandidate;
-    // Initialize with a very low salesAchieved so any real value wins.
-    bestCandidate.salesAchieved = -1.0f;
-    
-    if (node == NULL)
-        return bestCandidate;
-    
-    int i;
-    // Traverse all keys and children in the node
-    for (i = 0; i < node->num_keys; i++) {
-        // If not a leaf, check the child subtree
-        if (node->children[0] != NULL) {
-            SalesPerson childCandidate = find_top_in_sales_tree(node->children[i]);
-            if (childCandidate.salesAchieved > bestCandidate.salesAchieved)
-                bestCandidate = childCandidate;
-        }
-        // Check the current key
-        if (node->keys[i].salesAchieved > bestCandidate.salesAchieved)
-            bestCandidate = node->keys[i];
-    }
-    // Check the last child (if any)
-    if (node->children[0] != NULL) {
-        SalesPerson childCandidate = find_top_in_sales_tree(node->children[i]);
-        if (childCandidate.salesAchieved > bestCandidate.salesAchieved)
-            bestCandidate = childCandidate;
-    }
-    return bestCandidate;
+// Helper function to initialize a default SalesPerson
+SalesPerson default_sales_person() {
+    SalesPerson sp = {0};
+    sp.salesAchieved = -1.0f;  // Impossible value for real data
+    return sp;
 }
 
-// Function to iterate over all showrooms and find the overall best salesperson.
-SalesPerson find_top_sales_person(Showroom showrooms[], int numShowrooms) {
-    SalesPerson overallBest;
-    overallBest.salesAchieved = -1.0f;  // initialize with very low value
+// Revised recursive search function
+SalesPerson find_top_in_sales_tree(SalesTreeNode *node) {
+    SalesPerson best = default_sales_person();
     
-    for (int i = 0; i < numShowrooms; i++) {
-        SalesPerson candidate = find_top_in_sales_tree(showrooms[i].sales_root);
-        if (candidate.salesAchieved > overallBest.salesAchieved)
-            overallBest = candidate;
+    if (!node) return best;
+    
+    // Check all children and keys
+    for (int i = 0; i <= node->num_keys; i++) {
+        // Process child first (if exists)
+        if (i < node->num_keys + 1 && node->children[i]) {
+            SalesPerson child_best = find_top_in_sales_tree(node->children[i]);
+            if (child_best.salesAchieved > best.salesAchieved) {
+                best = child_best;
+            }
+        }
+        
+        // Process key (if exists)
+        if (i < node->num_keys) {
+            if (node->keys[i].salesAchieved > best.salesAchieved) {
+                best = node->keys[i];
+            }
+        }
     }
-    return overallBest;
+    
+    return best;
+}
+
+// Revised top salesperson finder
+SalesPerson find_top_sales_person(Showroom *showrooms, int count) {
+    SalesPerson overall_best = default_sales_person();
+    
+    for (int i = 0; i < count; i++) {
+        if (!showrooms[i].sales_root) continue;
+        
+        SalesPerson current = find_top_in_sales_tree(showrooms[i].sales_root);
+        if (current.salesAchieved > overall_best.salesAchieved) {
+            overall_best = current;
+        }
+    }
+    
+    return overall_best;
 }
 
 // Helper: Remove a car by VIN from the available-car tree (simplified for leaf nodes).
@@ -1157,15 +1162,18 @@ int main() {
 
     find_most_popular_car_model(mergedRoot);
 
-    SalesPerson topSalesPerson = find_top_sales_person(showrooms, 3);
+    SalesPerson top = find_top_sales_person(showrooms, 3);
     
-    // Calculate extra incentive (1% of sales achieved)
-    float extraIncentive = 0.01f * topSalesPerson.salesAchieved;
+    if (top.salesAchieved >= 0) {
+        printf("\nTop Salesperson \n");
+        printf("ID: %d\nName: %s\nSales: Rs.%.2f\nCommission: Rs.%.2f\n",
+               top.id, top.name, top.salesAchieved, top.commission);
+    } else {
+        printf("\n No sales records found!\n");
+    }
     
-    // Print the result.
-    printf("\nMost Successful Sales Person:\n");
-    printf("ID: %d, Name: %s\n", topSalesPerson.id, topSalesPerson.name);
-    printf("Sales Achieved: %.2f\n", topSalesPerson.salesAchieved);
+    // // Calculate extra incentive (1% of sales achieved)
+    float extraIncentive = 0.01f * top.salesAchieved;
     printf("Extra Incentive (1%% bonus): %.2f\n", extraIncentive);
 
     return 0;
