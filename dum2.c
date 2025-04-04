@@ -1220,8 +1220,10 @@ void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer custom
 }
 
 // Function to find a car in the available cars B-Tree
-Car* find_in_available(AvailableCarTreeNode *root, int vin) {
-    if (!root) return NULL;
+Car *find_in_available(AvailableCarTreeNode *root, int vin)
+{
+    if (!root)
+        return NULL;
 
     int i = 0;
     while (i < root->num_keys && vin > root->keys[i].VIN)
@@ -1234,8 +1236,10 @@ Car* find_in_available(AvailableCarTreeNode *root, int vin) {
 }
 
 // Function to search for a car in the sold cars B-Tree
-Car* find_in_sold(SoldCarTreeNode *root, int vin) {
-    if (!root) return NULL;
+Car *find_in_sold(SoldCarTreeNode *root, int vin)
+{
+    if (!root)
+        return NULL;
 
     int i = 0;
     while (i < root->num_keys && vin > root->keys[i].VIN)
@@ -1247,8 +1251,10 @@ Car* find_in_sold(SoldCarTreeNode *root, int vin) {
     return find_in_sold(root->children[i], vin);
 }
 
-Customer* find_customer(CustomerTreeNode *root, int customer_id) {
-    if (!root) return NULL;
+Customer *find_customer(CustomerTreeNode *root, int customer_id)
+{
+    if (!root)
+        return NULL;
 
     int i = 0;
     while (i < root->num_keys && customer_id > root->keys[i].id)
@@ -1261,7 +1267,8 @@ Customer* find_customer(CustomerTreeNode *root, int customer_id) {
 }
 
 // Function to display all car details (available or sold)
-void display_car_info(Showroom *showrooms, int vin) {
+void display_car_info(Showroom *showrooms, int vin)
+{
     printf("\n=== Car Information for VIN %d ===\n", vin);
 
     Car *car = NULL;
@@ -1269,19 +1276,24 @@ void display_car_info(Showroom *showrooms, int vin) {
     int showroom_number = -1;
 
     // Search in all showrooms for available cars
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++)
+    {
         car = find_in_available(showrooms[i].available_car_root, vin);
-        if (car) {
+        if (car)
+        {
             showroom_number = showrooms[i].showroom_id;
             break;
         }
     }
 
     // If not found in available cars, search in sold cars
-    if (!car) {
-        for (int i = 0; i < 3; i++) {
+    if (!car)
+    {
+        for (int i = 0; i < 3; i++)
+        {
             car = find_in_sold(showrooms[i].sold_car_root, vin);
-            if (car) {
+            if (car)
+            {
                 is_sold = true;
                 showroom_number = showrooms[i].showroom_id;
                 break;
@@ -1289,7 +1301,8 @@ void display_car_info(Showroom *showrooms, int vin) {
         }
     }
 
-    if (!car) {
+    if (!car)
+    {
         printf("Car not found in any showroom!\n");
         return;
     }
@@ -1304,7 +1317,8 @@ void display_car_info(Showroom *showrooms, int vin) {
     printf("Status:       %s\n", is_sold ? "Sold" : "Available");
 
     // If sold, display sale details
-    if (is_sold) {
+    if (is_sold)
+    {
         printf("\n--- Sale Details ---\n");
         printf("Sold Date:    %s\n", car->soldDate);
         printf("Customer ID:  %d\n", car->customer_id);
@@ -1312,14 +1326,16 @@ void display_car_info(Showroom *showrooms, int vin) {
 
         // Fetch customer details
         Customer *cust = find_customer(showrooms[showroom_number].customer_root, car->customer_id);
-        if (cust) {
+        if (cust)
+        {
             printf("Customer:     %s (%s)\n", cust->name, cust->mobile);
-        } else {
+        }
+        else
+        {
             printf("Customer details not found!\n");
         }
     }
 }
-
 
 // Example usage in main()
 int main()
