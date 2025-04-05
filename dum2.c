@@ -1112,41 +1112,6 @@ SalesPerson find_top_sales_person(Showroom *showrooms, int count)
     return overall_best;
 }
 
-// Helper: Remove a car by VIN from the available-car tree (simplified for leaf nodes).
-bool remove_car_from_available(AvailableCarTreeNode **root, int carVIN, Car *removedCar)
-{
-    if (*root == NULL)
-        return false;
-
-    AvailableCarTreeNode *node = *root;
-    // If leaf node:
-    if (node->children[0] == NULL)
-    {
-        for (int i = 0; i < node->num_keys; i++)
-        {
-            if (node->keys[i].VIN == carVIN)
-            {
-                *removedCar = node->keys[i];
-                // Shift remaining keys left.
-                for (int j = i; j < node->num_keys - 1; j++)
-                {
-                    node->keys[j] = node->keys[j + 1];
-                }
-                node->num_keys--;
-                return true;
-            }
-        }
-        return false;
-    }
-    // If not a leaf, search in children.
-    for (int i = 0; i <= node->num_keys; i++)
-    {
-        if (remove_car_from_available(&node->children[i], carVIN, removedCar))
-            return true;
-    }
-    return false;
-}
-
 // Helper: Search for a salesperson in the sales B-Tree.
 SalesPerson *find_sales_person(SalesTreeNode *node, int salespersonID)
 {
@@ -1166,15 +1131,125 @@ SalesPerson *find_sales_person(SalesTreeNode *node, int salespersonID)
     return NULL;
 }
 
+void update_available_cars_file(Showroom *showroom) {
+    char filename[50];
+    sprintf(filename, "showroom%d_available_cars.txt", showroom->showroom_id);
+    FILE *fp = fopen(filename, "w");
+    if (!fp) {
+        printf("Error opening file %s for available cars.\n", filename);
+        return;
+    }
+    // For simplicity, we assume an in-order traversal writes one record per line.
+    // (You would write a proper traversal that prints each Car's fields.)
+    // Here we use a recursive helper (not fully implemented):
+    // write_available_tree(fp, showroom->available_car_root);
+    fprintf(fp, "[Updated available cars]\n");
+    fclose(fp);
+}
+
+// Append a sold car record to the sold cars file.
+void update_sold_car_file(Showroom *showroom, Car soldCar) {
+    char filename[50];
+    sprintf(filename, "showroom%d_sold_cars.txt", showroom->showroom_id);
+    FILE *fp = fopen(filename, "a");
+    if (!fp) {
+        printf("Error opening file %s for sold cars.\n", filename);
+        return;
+    }
+    fprintf(fp, "%d, %s, %0.2f, Sold on %s, Customer ID: %d, Salesperson ID: %d\n",
+            soldCar.VIN, soldCar.name, soldCar.price, soldCar.soldDate,
+            soldCar.customer_id, soldCar.salesperson_id);
+    fclose(fp);
+}
+
+// Append a new customer record to the customer file.
+void update_customer_file(Showroom *showroom, Customer customer) {
+    char filename[50];
+    sprintf(filename, "showroom%d_customers.txt", showroom->showroom_id);
+    FILE *fp = fopen(filename, "a");
+    if (!fp) {
+        printf("Error opening file %s for customers.\n", filename);
+        return;
+    }
+    fprintf(fp, "ID: %d, Name: %s, Mobile: %s, Address: %s, Car VIN: %d, Payment: %s, Down: %.2f, LoanMonths: %d, EMI: %.2f\n",
+            customer.id, customer.name, customer.mobile, customer.address,
+            customer.soldCarVIN, customer.payment_type, customer.downPayment,
+            customer.loanMonths, customer.monthlyEMI);
+    fclose(fp);
+}
+
+// Update salesperson file. (Here we rewrite all salespersons for the showroom.)
+// In a real system you might update a record in place.
+void update_salesperson_file(Showroom *showroom, SalesPerson *sp) {
+    char filename[50];
+    sprintf(filename, "showroom%d_salesperson.txt", showroom->showroom_id);
+    FILE *fp = fopen(filename, "a");
+    if (!fp) {
+        printf("Error opening file %s for salesperson updates.\n", filename);
+        return;
+    }
+    fprintf(fp, "ID: %d, Name: %s, SalesAchieved: %.2f, TotalSales: %.2f, Commission: %.2f\n",
+            sp->id, sp->name, sp->salesAchieved, sp->totalSales, sp->commission);
+    fclose(fp);
+}
+
+// ----- Stub Functions for Tree Operations -----
+// You must implement these functions as per your B-Tree logic.
+// Here, they are only placeholders.
+
+// Finds a car in the available tree by VIN.
+Car* find_in_available(AvailableCarTreeNode *root, int carVIN) {
+    // For simplicity, we do an in-order search.
+    if (root == NULL) return NULL;
+    for (int i = 0; i < root->num_keys; i++) {
+        if (root->keys[i].VIN == carVIN) {
+            return &root->keys[i];
+        }
+    }
+    // In a non-leaf node, search children.
+    for (int i = 0; i <= root->num_keys; i++) {
+        Car *res = find_in_available(root->children[i], carVIN);
+        if (res != NULL) return res;
+    }
+    return NULL;
+}
+
+// Removes a car from the available tree by VIN.
+bool remove_car_from_available(AvailableCarTreeNode **root, int carVIN, Car *removedCar) {
+    if (*root == NULL)
+        return false;
+
+    AvailableCarTreeNode *node = *root;
+    // If leaf node:
+    if (node->children[0] == NULL) {
+        for (int i = 0; i < node->num_keys; i++) {
+            if (node->keys[i].VIN == carVIN) {
+                *removedCar = node->keys[i];
+                // Shift remaining keys left.
+                for (int j = i; j < node->num_keys - 1; j++) {
+                    node->keys[j] = node->keys[j + 1];
+                }
+                node->num_keys--;
+                return true;
+            }
+        }
+        return false;
+    }
+    // If not a leaf, search in children.
+    for (int i = 0; i <= node->num_keys; i++) {
+        if (remove_car_from_available(&node->children[i], carVIN, removedCar))
+            return true;
+    }
+    return false;
+}
+
 // Main function to process a car sale.
-void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer customer)
-{
+void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer customer) {
     Car carToSell;
 
     // Remove the car from the available inventory.
     bool found = remove_car_from_available(&showroom->available_car_root, carVIN, &carToSell);
-    if (!found)
-    {
+    if (!found) {
         printf("Car with VIN %d not found in available inventory.\n", carVIN);
         return;
     }
@@ -1183,37 +1258,37 @@ void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer custom
     carToSell.isSold = true;
     carToSell.customer_id = customer.id;
     carToSell.salesperson_id = salespersonID;
-    // Set the sold date (here, using a fixed date; replace with dynamic date if needed)
     strcpy(carToSell.soldDate, "2025-04-02");
 
     // Insert the car into the sold-car tree.
     insert_sold_car(&showroom->sold_car_root, carToSell);
+    update_sold_car_file(showroom, carToSell);
 
     // Find the salesperson and update their sales metrics.
     SalesPerson *sp = find_sales_person(showroom->sales_root, salespersonID);
-    if (sp == NULL)
-    {
+    if (sp == NULL) {
         printf("Salesperson with ID %d not found.\n", salespersonID);
         return;
     }
     sp->salesAchieved += carToSell.price;
     sp->totalSales += carToSell.price;
     sp->commission = 0.02f * sp->salesAchieved;
+    update_salesperson_file(showroom, sp);
 
-    // Update the customer record with the sold car's VIN and insert into the customer tree.
-    customer.soldCarVIN = carVIN;
+    // Insert the customer record into the customer tree.
     insert_customer(&showroom->customer_root, customer);
 
-    // Update stock details: decrement available count and increment sold count for the car's model.
-    for (int i = 0; i < MODELS; i++)
-    {
-        if (strcmp(showroom->stock[i].car_model, carToSell.name) == 0)
-        {
+    // Update stock details: decrement available count and increment sold count.
+    for (int i = 0; i < MODELS; i++) {
+        if (strcmp(showroom->stock[i].car_model, carToSell.name) == 0) {
             showroom->stock[i].available_cars--;
             showroom->stock[i].sold_cars++;
             break;
         }
     }
+
+    // After removal, update available cars file.
+    update_available_cars_file(showroom);
 
     printf("Car with VIN %d sold to Customer ID %d by Salesperson ID %d.\n",
            carVIN, customer.id, salespersonID);
@@ -1587,6 +1662,110 @@ void search_all_showrooms_by_sales_range(Showroom showrooms[], int count, float 
     }
 }
 
+int find_max_customer_id(CustomerTreeNode *root) {
+    if (root == NULL) return -1;
+    int max_id = -1;
+    for (int i = 0; i < root->num_keys; i++) {
+        if (root->keys[i].id > max_id) {
+            max_id = root->keys[i].id;
+        }
+    }
+    if (root->children[0] != NULL) {
+        int child_max = find_max_customer_id(root->children[root->num_keys]);
+        if (child_max > max_id) {
+            max_id = child_max;
+        }
+    }
+    return max_id;
+}
+
+void process_car_sale(Showroom *showroom, int carVIN, int salespersonID,
+                      const char *customerName, const char *mobile, const char *address,
+                      const char *paymentType, float downPayment, int loanMonths, float interestRate) {
+    // Check if car is available
+    Car *car = find_in_available(showroom->available_car_root, carVIN);
+    if (car == NULL) {
+        printf("Error: Car with VIN %d is not available for sale.\n", carVIN);
+        return;
+    }
+
+    // Check if salesperson exists
+    SalesPerson *sp = find_sales_person(showroom->sales_root, salespersonID);
+    if (sp == NULL) {
+        printf("Error: Salesperson with ID %d not found.\n", salespersonID);
+        return;
+    }
+
+    // Validate payment type
+    if (strcmp(paymentType, "Cash") != 0 && strcmp(paymentType, "Loan") != 0) {
+        printf("Error: Invalid payment type. Must be 'Cash' or 'Loan'.\n");
+        return;
+    }
+
+    // Validate down payment and loan details
+    if (strcmp(paymentType, "Cash") == 0) {
+        if (fabs(downPayment - car->price) > 0.01) {
+            printf("Error: For Cash payment, down payment must equal car price (%.2f).\n", car->price);
+            return;
+        }
+        loanMonths = 0;
+        interestRate = 0.0f;
+    } else {
+        if (downPayment >= car->price) {
+            printf("Error: Down payment must be less than car price for a loan.\n");
+            return;
+        }
+        if (loanMonths <= 0 || loanMonths > MAX_MONTHS) {
+            printf("Error: Loan months must be between 1 and %d.\n", MAX_MONTHS);
+            return;
+        }
+        if (interestRate <= 0.0f) {
+            printf("Error: Interest rate must be positive.\n");
+            return;
+        }
+    }
+
+    // Generate new customer ID
+    int newCustomerID = find_max_customer_id(showroom->customer_root) + 1;
+
+    // Populate customer details
+    Customer newCustomer;
+    newCustomer.id = newCustomerID;
+    strncpy(newCustomer.name, customerName, sizeof(newCustomer.name) - 1);
+    newCustomer.name[sizeof(newCustomer.name) - 1] = '\0';
+    strncpy(newCustomer.mobile, mobile, sizeof(newCustomer.mobile) - 1);
+    newCustomer.mobile[sizeof(newCustomer.mobile) - 1] = '\0';
+    strncpy(newCustomer.address, address, sizeof(newCustomer.address) - 1);
+    newCustomer.address[sizeof(newCustomer.address) - 1] = '\0';
+    newCustomer.soldCarVIN = carVIN;
+    strcpy(newCustomer.registrationNumber, "PENDING"); // Placeholder for registration
+    strncpy(newCustomer.payment_type, paymentType, sizeof(newCustomer.payment_type) - 1);
+    newCustomer.payment_type[sizeof(newCustomer.payment_type) - 1] = '\0';
+    newCustomer.downPayment = downPayment;
+    newCustomer.loanMonths = loanMonths;
+    newCustomer.interestRate = interestRate;
+
+    // Calculate EMI for loan
+    if (strcmp(paymentType, "Loan") == 0) {
+        float principal = car->price - downPayment;
+        float monthlyInterest = interestRate / 12.0f / 100.0f;
+        float emi = (principal * monthlyInterest * pow(1 + monthlyInterest, loanMonths)) /
+                    (pow(1 + monthlyInterest, loanMonths) - 1);
+        newCustomer.monthlyEMI = emi;
+        newCustomer.loanAmount = principal;
+    } else {
+        newCustomer.monthlyEMI = 0.0f;
+        newCustomer.loanAmount = 0.0f;
+    }
+
+    // Process the sale
+    sell_car(showroom, carVIN, salespersonID, newCustomer);
+
+    update_customer_file(showroom, newCustomer);
+
+    printf("Sale processed successfully. Customer ID: %d\n", newCustomerID);
+}
+
 int main()
 {
     Showroom showrooms[3];
@@ -1610,8 +1789,9 @@ int main()
         printf("5. Search Car by VIN\n");
         printf("6. List Customers with EMI 36-48 Months\n");
         printf("7. Add New Sales Person\n");
-        printf("8. Search Salesperson in range\n");
-        printf("9. Exit\n");
+        printf("8. Search Salesperson in Range\n");
+        printf("9. Process Car Sale\n"); // New option
+        printf("10. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -1720,13 +1900,63 @@ int main()
             search_all_showrooms_by_sales_range(showrooms, 3, min_sales, max_sales);
             break;
         }
-        case 9:
+        case 9: {
+            int showroom_num, carVIN, salespersonID;
+            char customerName[50], mobile[15], address[100], paymentType[20];
+            float downPayment = 0.0f, interestRate = 0.0f;
+            int loanMonths = 0;
+
+            printf("Enter Showroom Number (1-3): ");
+            scanf("%d", &showroom_num);
+            if (showroom_num < 1 || showroom_num > 3) {
+                printf("Invalid showroom number.\n");
+                break;
+            }
+            Showroom *selected_showroom = &showrooms[showroom_num - 1];
+
+            printf("Enter Car VIN: ");
+            scanf("%d", &carVIN);
+
+            printf("Enter Salesperson ID: ");
+            scanf("%d", &salespersonID);
+
+            printf("Enter Customer Name: ");
+            scanf(" %49[^\n]", customerName); // Read up to 49 characters to avoid overflow
+
+            printf("Enter Mobile Number: ");
+            scanf(" %14s", mobile);
+
+            printf("Enter Address: ");
+            scanf(" %99[^\n]", address);
+
+            printf("Enter Payment Type (Cash/Loan): ");
+            scanf(" %19s", paymentType);
+
+            if (strcmp(paymentType, "Loan") == 0) {
+                printf("Enter Down Payment: ");
+                scanf("%f", &downPayment);
+                printf("Enter Loan Months (1-%d): ", MAX_MONTHS);
+                scanf("%d", &loanMonths);
+                printf("Enter Interest Rate (%%): ");
+                scanf("%f", &interestRate);
+            }
+
+            // Process the sale
+            process_car_sale(
+                selected_showroom, carVIN, salespersonID,
+                customerName, mobile, address,
+                paymentType, downPayment, loanMonths, interestRate
+            );
+            break;
+        }
+            
+        case 10:
             printf("Exiting program...\n");
             break;
         default:
             printf("Invalid choice! Please try again.\n");
         }
-    } while (choice != 8);
+    } while (choice != 10);
 
     for (int i = 0; i < 3; i++)
     {
