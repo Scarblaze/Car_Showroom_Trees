@@ -1326,6 +1326,37 @@ void display_car_info(Showroom *showrooms, int vin)
     }
 }
 
+int print_emi_customers(CustomerTreeNode *root) {
+    int count = 0;
+    if (root == NULL) return count;
+
+    // Check current node's customers
+    for (int i = 0; i < root->num_keys; i++) {
+        Customer *c = &root->keys[i];
+        if (strcmp(c->payment_type, "Loan") == 0 && 
+            c->loanMonths >= 36 && 
+            c->loanMonths <= 48) {
+            
+            printf("\nCustomer ID: %d", c->id);
+            printf("\nName: %s", c->name);
+            printf("\nMobile: %s", c->mobile);
+            printf("\nVIN: %d", c->soldCarVIN);
+            printf("\nEMI Duration: %d months", c->loanMonths);
+            printf("\nMonthly EMI: Rs.%.2f", c->monthlyEMI);
+            printf("\nLoan Amount: Rs.%.2f", c->loanAmount);
+            printf("\n-----------------------");
+            count++;
+        }
+    }
+
+    // Recursively check child nodes
+    for (int i = 0; i <= root->num_keys; i++) {
+        count += print_emi_customers(root->children[i]);
+    }
+    
+    return count;
+}
+
 // Example usage in main()
 
 #include <stdio.h>
@@ -1354,7 +1385,8 @@ int main()
         printf("3. Find Most Popular Car Model\n");
         printf("4. Find Top Salesperson\n");
         printf("5. Search Car by VIN\n");
-        printf("6. Exit\n");
+        printf("6. List Customers with EMI 36-48 Months\n");
+        printf("7. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -1418,27 +1450,37 @@ int main()
             break;
         }
 
-        case 6:
-            printf("Exiting program...\n");
+        case 6: {
+            printf("\n--- Customers with EMI 36-48 Months ---\n");
+            int found = 0;
+            for (int i = 0; i < 3; i++) {
+                printf("\nShowroom %d:\n", i+1);
+                found += print_emi_customers(showrooms[i].customer_root);
+            }
+            if (!found) {
+                printf("\nNo customers found with EMI plans between 36-48 months.\n");
+            }
             break;
+        }
+        
 
         default:
             printf("Invalid choice! Please try again.\n");
         }
     } while (choice != 6);
 
-    for (int i = 0; i < 3; i++)
-    {
-        free_available_cars(showrooms[i].available_car_root);
-        free_sold_cars(showrooms[i].sold_car_root);
-        free_sales_persons(showrooms[i].sales_root);
-        free_customers(showrooms[i].customer_root);
-    }
+    // for (int i = 0; i < 3; i++)
+    // {
+    //     free_available_cars(showrooms[i].available_car_root);
+    //     free_sold_cars(showrooms[i].sold_car_root);
+    //     free_sales_persons(showrooms[i].sales_root);
+    //     free_customers(showrooms[i].customer_root);
+    // }
 
-    if (mergedRoot != NULL)
-    {
-        free_merged_cars(mergedRoot);
-    }
+    // if (mergedRoot != NULL)
+    // {
+    //     free_merged_cars(mergedRoot);
+    // }
     return 0;
 }
 
