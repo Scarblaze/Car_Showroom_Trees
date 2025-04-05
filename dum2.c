@@ -1326,17 +1326,21 @@ void display_car_info(Showroom *showrooms, int vin)
     }
 }
 
-int print_emi_customers(CustomerTreeNode *root) {
+int print_emi_customers(CustomerTreeNode *root)
+{
     int count = 0;
-    if (root == NULL) return count;
+    if (root == NULL)
+        return count;
 
     // Check current node's customers
-    for (int i = 0; i < root->num_keys; i++) {
+    for (int i = 0; i < root->num_keys; i++)
+    {
         Customer *c = &root->keys[i];
-        if (strcmp(c->payment_type, "Loan") == 0 && 
-            c->loanMonths >= 36 && 
-            c->loanMonths <= 48) {
-            
+        if (strcmp(c->payment_type, "Loan") == 0 &&
+            c->loanMonths >= 36 &&
+            c->loanMonths <= 48)
+        {
+
             printf("\nCustomer ID: %d", c->id);
             printf("\nName: %s", c->name);
             printf("\nMobile: %s", c->mobile);
@@ -1350,19 +1354,87 @@ int print_emi_customers(CustomerTreeNode *root) {
     }
 
     // Recursively check child nodes
-    for (int i = 0; i <= root->num_keys; i++) {
+    for (int i = 0; i <= root->num_keys; i++)
+    {
         count += print_emi_customers(root->children[i]);
     }
-    
+
     return count;
 }
 
 // Example usage in main()
 
-#include <stdio.h>
-#include <stdlib.h>
+// Available Cars B-Tree cleanup
+void free_available_cars(AvailableCarTreeNode *root)
+{
+    if (root == NULL)
+        return;
 
-// Assuming necessary struct and function declarations are present
+    // Recursively free all children
+    for (int i = 0; i <= root->num_keys; i++)
+    {
+        free_available_cars(root->children[i]);
+    }
+
+    // Free current node
+    free(root);
+}
+
+// Sold Cars B-Tree cleanup
+void free_sold_cars(SoldCarTreeNode *root)
+{
+    if (root == NULL)
+        return;
+
+    for (int i = 0; i <= root->num_keys; i++)
+    {
+        free_sold_cars(root->children[i]);
+    }
+
+    free(root);
+}
+
+// Sales Persons B-Tree cleanup
+void free_sales_persons(SalesTreeNode *root)
+{
+    if (root == NULL)
+        return;
+
+    for (int i = 0; i <= root->num_keys; i++)
+    {
+        free_sales_persons(root->children[i]);
+    }
+
+    free(root);
+}
+
+// Customers B-Tree cleanup
+void free_customers(CustomerTreeNode *root)
+{
+    if (root == NULL)
+        return;
+
+    for (int i = 0; i <= root->num_keys; i++)
+    {
+        free_customers(root->children[i]);
+    }
+
+    free(root);
+}
+
+// Merged Cars B-Tree cleanup
+void free_merged_cars(MergedCarTreeNode *root)
+{
+    if (root == NULL)
+        return;
+
+    for (int i = 0; i <= root->num_keys; i++)
+    {
+        free_merged_cars(root->children[i]);
+    }
+
+    free(root);
+}
 
 int main()
 {
@@ -1450,37 +1522,43 @@ int main()
             break;
         }
 
-        case 6: {
+        case 6:
+        {
             printf("\n--- Customers with EMI 36-48 Months ---\n");
             int found = 0;
-            for (int i = 0; i < 3; i++) {
-                printf("\nShowroom %d:\n", i+1);
+            for (int i = 0; i < 3; i++)
+            {
+                printf("\nShowroom %d:\n", i + 1);
                 found += print_emi_customers(showrooms[i].customer_root);
             }
-            if (!found) {
+            if (!found)
+            {
                 printf("\nNo customers found with EMI plans between 36-48 months.\n");
             }
             break;
         }
-        
+
+        case 7:
+            printf("Exiting program...\n");
+            break;
 
         default:
             printf("Invalid choice! Please try again.\n");
         }
-    } while (choice != 6);
+    } while (choice != 7);
 
-    // for (int i = 0; i < 3; i++)
-    // {
-    //     free_available_cars(showrooms[i].available_car_root);
-    //     free_sold_cars(showrooms[i].sold_car_root);
-    //     free_sales_persons(showrooms[i].sales_root);
-    //     free_customers(showrooms[i].customer_root);
-    // }
+    for (int i = 0; i < 3; i++)
+    {
+        free_available_cars(showrooms[i].available_car_root);
+        free_sold_cars(showrooms[i].sold_car_root);
+        free_sales_persons(showrooms[i].sales_root);
+        free_customers(showrooms[i].customer_root);
+    }
 
-    // if (mergedRoot != NULL)
-    // {
-    //     free_merged_cars(mergedRoot);
-    // }
+    if (mergedRoot != NULL)
+    {
+        free_merged_cars(mergedRoot);
+    }
     return 0;
 }
 
