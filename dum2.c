@@ -1131,21 +1131,21 @@ SalesPerson *find_sales_person(SalesTreeNode *node, int salespersonID)
     return NULL;
 }
 
-void update_available_cars_file(Showroom *showroom) {
-    char filename[50];
-    sprintf(filename, "showroom%d_available_cars.txt", showroom->showroom_id);
-    FILE *fp = fopen(filename, "w");
-    if (!fp) {
-        printf("Error opening file %s for available cars.\n", filename);
-        return;
-    }
-    // For simplicity, we assume an in-order traversal writes one record per line.
-    // (You would write a proper traversal that prints each Car's fields.)
-    // Here we use a recursive helper (not fully implemented):
-    // write_available_tree(fp, showroom->available_car_root);
-    fprintf(fp, "[Updated available cars]\n");
-    fclose(fp);
-}
+// void update_available_cars_file(Showroom *showroom) {
+//     char filename[50];
+//     sprintf(filename, "showroom%d_available_cars.txt", showroom->showroom_id);
+//     FILE *fp = fopen(filename, "w");
+//     if (!fp) {
+//         printf("Error opening file %s for available cars.\n", filename);
+//         return;
+//     }
+//     // For simplicity, we assume an in-order traversal writes one record per line.
+//     // (You would write a proper traversal that prints each Car's fields.)
+//     // Here we use a recursive helper (not fully implemented):
+//     // write_available_tree(fp, showroom->available_car_root);
+//     fprintf(fp, "[Updated available cars]\n");
+//     fclose(fp);
+// }
 
 // Append a sold car record to the sold cars file.
 void update_sold_car_file(Showroom *showroom, Car soldCar) {
@@ -1292,22 +1292,6 @@ void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer custom
 
     printf("Car with VIN %d sold to Customer ID %d by Salesperson ID %d.\n",
            carVIN, customer.id, salespersonID);
-}
-
-// Function to find a car in the available cars B-Tree
-Car *find_in_available(AvailableCarTreeNode *root, int vin)
-{
-    if (!root)
-        return NULL;
-
-    int i = 0;
-    while (i < root->num_keys && vin > root->keys[i].VIN)
-        i++;
-
-    if (i < root->num_keys && vin == root->keys[i].VIN)
-        return &root->keys[i];
-
-    return find_in_available(root->children[i], vin);
 }
 
 // Function to search for a car in the sold cars B-Tree
