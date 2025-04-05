@@ -1382,16 +1382,18 @@ SalesPerson *search_sales_person(SalesTreeNode *node, int id)
 }
 
 // Function to append new sales person to file
-void append_sales_person(int showroom_id, SalesPerson *sp) {
+void append_sales_person(int showroom_id, SalesPerson *sp)
+{
     char filename[50];
     sprintf(filename, "showroom%d_salesperson.txt", showroom_id);
-    
+
     FILE *fp = fopen(filename, "a");
-    if (fp == NULL) {
+    if (fp == NULL)
+    {
         printf("Error opening file for appending!\n");
         return;
     }
-    
+
     // Write all fields in the correct order matching your file format
     fprintf(fp, "%d,%s,%.2f,%.2f,%.2f,%.2f\n",
             sp->id,
@@ -1400,42 +1402,51 @@ void append_sales_person(int showroom_id, SalesPerson *sp) {
             sp->salesAchieved,
             sp->totalSales,
             sp->commission);
-    
+
     fclose(fp);
 }
 
 // Complete add_sales_person function
-void add_sales_person(Showroom showrooms[3]) {
+void add_sales_person(Showroom showrooms[3])
+{
     int showroom_num;
     printf("\nSelect Showroom (1-3): ");
-    
+
     // Input validation for showroom number
-    if (scanf("%d", &showroom_num) != 1 || showroom_num < 1 || showroom_num > 3) {
+    if (scanf("%d", &showroom_num) != 1 || showroom_num < 1 || showroom_num > 3)
+    {
         printf("Invalid showroom selection!\n");
-        while(getchar() != '\n'); // Clear input buffer
+        while (getchar() != '\n')
+            ; // Clear input buffer
         return;
     }
     getchar(); // Consume newline
 
-    Showroom *sr = &showrooms[showroom_num-1];
+    Showroom *sr = &showrooms[showroom_num - 1];
     SalesPerson sp;
 
     // ID Input and validation loop
     int valid_id = 0;
-    while(!valid_id) {
+    while (!valid_id)
+    {
         printf("Enter Sales Person ID: ");
-        if (scanf("%d", &sp.id) != 1) {
+        if (scanf("%d", &sp.id) != 1)
+        {
             printf("Invalid ID format! Please enter a number.\n");
-            while(getchar() != '\n');
+            while (getchar() != '\n')
+                ;
             continue;
         }
         getchar(); // Consume newline
-        
+
         // Check for existing ID
-        SalesPerson* existing = search_sales_person(sr->sales_root, sp.id);
-        if (existing != NULL) {
+        SalesPerson *existing = search_sales_person(sr->sales_root, sp.id);
+        if (existing != NULL)
+        {
             printf("ID %d already exists! Try another ID.\n", sp.id);
-        } else {
+        }
+        else
+        {
             valid_id = 1;
         }
     }
@@ -1446,7 +1457,7 @@ void add_sales_person(Showroom showrooms[3]) {
     sp.name[strcspn(sp.name, "\n")] = '\0'; // Remove newline
 
     // Initialize sales data
-    sp.salesTarget = 5000000.0f;  // 50 lakhs default
+    sp.salesTarget = 5000000.0f; // 50 lakhs default
     sp.salesAchieved = 0.0f;
     sp.totalSales = 0.0f;
     sp.commission = 0.0f;
@@ -1455,17 +1466,16 @@ void add_sales_person(Showroom showrooms[3]) {
 
     // Insert into B-tree
     insert_sales_person(&sr->sales_root, sp);
-    
+
     // Append to text file
     append_sales_person(showroom_num, &sp);
-    
+
     // Success message
     printf("\nSales person added successfully!\n");
-    printf("Showroom: %d\nID: %d\nName: %s\n", 
-          showroom_num, sp.id, sp.name);
+    printf("Showroom: %d\nID: %d\nName: %s\n",
+           showroom_num, sp.id, sp.name);
     printf("Data saved to showroom%d_salesperson.txt\n", showroom_num);
 }
-
 
 // Available Cars B-Tree cleanup
 void free_available_cars(AvailableCarTreeNode *root)
@@ -1539,6 +1549,44 @@ void free_merged_cars(MergedCarTreeNode *root)
     free(root);
 }
 
+void search_salesperson_by_sales_range(SalesTreeNode *node, float min_sales, float max_sales)
+{
+    if (node == NULL)
+        return;
+
+    int i;
+    for (i = 0; i < node->num_keys; i++)
+    {
+        if (node->children[0] != NULL)
+        {
+            search_salesperson_by_sales_range(node->children[i], min_sales, max_sales);
+        }
+
+        float sales = node->keys[i].salesAchieved;
+        if (sales >= min_sales && sales <= max_sales)
+        {
+            printf("Salesperson ID: %d | Name: %s | Sales Achieved: %.2f\n",
+                   node->keys[i].id,
+                   node->keys[i].name,
+                   node->keys[i].salesAchieved);
+        }
+    }
+
+    if (node->children[0] != NULL)
+    {
+        search_salesperson_by_sales_range(node->children[i], min_sales, max_sales);
+    }
+}
+
+void search_all_showrooms_by_sales_range(Showroom showrooms[], int count, float min_sales, float max_sales)
+{
+    for (int i = 0; i < count; i++)
+    {
+        printf("\n--- Searching Salespersons in Showroom %d ---\n", showrooms[i].showroom_id);
+        search_salesperson_by_sales_range(showrooms[i].sales_root, min_sales, max_sales);
+    }
+}
+
 int main()
 {
     Showroom showrooms[3];
@@ -1562,7 +1610,8 @@ int main()
         printf("5. Search Car by VIN\n");
         printf("6. List Customers with EMI 36-48 Months\n");
         printf("7. Add New Sales Person\n");
-        printf("8. Exit\n");
+        printf("8. Search Salesperson in range\n");
+        printf("9. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -1647,9 +1696,33 @@ int main()
             break;
 
         case 8:
+        {
+            float min_sales, max_sales;
+            printf("Enter minimum sales amount: ");
+            if (scanf("%f", &min_sales) != 1)
+            {
+                printf("Invalid input for min_sales.\n");
+                return 1;
+            }
+
+            printf("Enter maximum sales amount: ");
+            if (scanf("%f", &max_sales) != 1)
+            {
+                printf("Invalid input for max_sales.\n");
+                return 1;
+            }
+
+            if (min_sales > max_sales)
+            {
+                printf("Error: Minimum sales cannot be greater than maximum sales.\n");
+                return 1;
+            }
+            search_all_showrooms_by_sales_range(showrooms, 3, min_sales, max_sales);
+            break;
+        }
+        case 9:
             printf("Exiting program...\n");
             break;
-
         default:
             printf("Invalid choice! Please try again.\n");
         }
