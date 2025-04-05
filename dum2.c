@@ -1311,7 +1311,7 @@ void display_car_info(Showroom *showrooms, int vin)
     printf("Showroom:     %d\n", showroom_number);
     printf("Model:        %s\n", car->name);
     printf("Color:        %s\n", car->color);
-    printf("Price:        ₹%.2f\n", car->price);
+    printf("Price:        Rs.%.2f\n", car->price);
     printf("Fuel Type:    %s\n", car->fuelType);
     printf("Category:     %s\n", car->carType);
     printf("Status:       %s\n", is_sold ? "Sold" : "Available");
@@ -1323,70 +1323,175 @@ void display_car_info(Showroom *showrooms, int vin)
         printf("Sold Date:    %s\n", car->soldDate);
         printf("Customer ID:  %d\n", car->customer_id);
         printf("Salesperson:  %d\n", car->salesperson_id);
-
-        // Fetch customer details
-        Customer *cust = find_customer(showrooms[showroom_number].customer_root, car->customer_id);
-        if (cust)
-        {
-            printf("Customer:     %s (%s)\n", cust->name, cust->mobile);
-        }
-        else
-        {
-            printf("Customer details not found!\n");
-        }
     }
 }
 
 // Example usage in main()
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Assuming necessary struct and function declarations are present
+
 int main()
 {
     Showroom showrooms[3];
+    MergedCarTreeNode *mergedRoot = NULL;
 
+    // Load showroom data
     for (int i = 0; i < 3; i++)
     {
         showrooms[i].showroom_id = i + 1;
         load_showroom_data(&showrooms[i], i + 1);
-
-        printf("\n=== Showroom %d ===\n", i + 1);
-        printf("Available Cars (VINs): ");
-        traverse_available_car(showrooms[i].available_car_root);
-        printf("\nSold Cars (VINs): ");
-        traverse_sold_car(showrooms[i].sold_car_root);
-        printf("\nSales Persons (IDs): ");
-        traverse_sales_person(showrooms[i].sales_root);
-        printf("\nCustomers (IDs): ");
-        traverse_customer(showrooms[i].customer_root);
-        printf("\n");
     }
-    MergedCarTreeNode *mergedRoot = merge_showrooms(showrooms, 3);
 
-    // Traverse the merged B-Tree and display VIN, model name, showroom number, and isSold flag.
-    printf("\n--- Merged Car Data ---\n");
-    traverse_merged_car(mergedRoot);
-
-    find_most_popular_car_model(mergedRoot);
-
-    SalesPerson top = find_top_sales_person(showrooms, 3);
-
-    if (top.salesAchieved >= 0)
+    int choice;
+    do
     {
-        printf("\nTop Salesperson \n");
-        printf("ID: %d\nName: %s\nSales: Rs.%.2f\nCommission: Rs.%.2f\n",
-               top.id, top.name, top.salesAchieved, top.commission);
-    }
-    else
+        printf("\n=== Car Showroom Management System ===\n");
+        printf("1. Display Individual Showroom Details\n");
+        printf("2. Merge Showrooms and Display Car Data\n");
+        printf("3. Find Most Popular Car Model\n");
+        printf("4. Find Top Salesperson\n");
+        printf("5. Search Car by VIN\n");
+        printf("6. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1:
+            for (int i = 0; i < 3; i++)
+            {
+                printf("\n=== Showroom %d ===\n", i + 1);
+                printf("Available Cars (VINs): ");
+                traverse_available_car(showrooms[i].available_car_root);
+                printf("\nSold Cars (VINs): ");
+                traverse_sold_car(showrooms[i].sold_car_root);
+                printf("\nSales Persons (IDs): ");
+                traverse_sales_person(showrooms[i].sales_root);
+                printf("\nCustomers (IDs): ");
+                traverse_customer(showrooms[i].customer_root);
+                printf("\n");
+            }
+            break;
+
+        case 2:
+            mergedRoot = merge_showrooms(showrooms, 3);
+            printf("\n--- Merged Car Data ---\n");
+            traverse_merged_car(mergedRoot);
+            break;
+
+        case 3:
+            if (mergedRoot == NULL)
+            {
+                printf("Please merge showrooms first (Option 2)!\n");
+                break;
+            }
+            find_most_popular_car_model(mergedRoot);
+            break;
+
+        case 4:
+        {
+            SalesPerson top = find_top_sales_person(showrooms, 3);
+            if (top.salesAchieved >= 0)
+            {
+                printf("\nTop Salesperson \n");
+                printf("ID: %d\nName: %s\nSales: Rs.%.2f\nCommission: Rs.%.2f\n",
+                       top.id, top.name, top.salesAchieved, top.commission);
+                float extraIncentive = 0.01f * top.salesAchieved;
+                printf("Extra Incentive (1%% bonus): %.2f\n", extraIncentive);
+            }
+            else
+            {
+                printf("\nNo sales records found!\n");
+            }
+            break;
+        }
+
+        case 5:
+        {
+            int vin;
+            printf("Enter VIN to search: ");
+            scanf("%d", &vin);
+            display_car_info(showrooms, vin);
+            break;
+        }
+
+        case 6:
+            printf("Exiting program...\n");
+            break;
+
+        default:
+            printf("Invalid choice! Please try again.\n");
+        }
+    } while (choice != 6);
+
+    for (int i = 0; i < 3; i++)
     {
-        printf("\n No sales records found!\n");
+        free_available_cars(showrooms[i].available_car_root);
+        free_sold_cars(showrooms[i].sold_car_root);
+        free_sales_persons(showrooms[i].sales_root);
+        free_customers(showrooms[i].customer_root);
     }
 
-    // // Calculate extra incentive (1% of sales achieved)
-    float extraIncentive = 0.01f * top.salesAchieved;
-    printf("Extra Incentive (1%% bonus): %.2f\n", extraIncentive);
-
-    int vin;
-    printf("Enter VIN to search: ");
-    scanf("%d", &vin);
-
-    display_car_info(showrooms, vin);
+    if (mergedRoot != NULL)
+    {
+        free_merged_cars(mergedRoot);
+    }
     return 0;
 }
+
+// int main()
+// {
+//     Showroom showrooms[3];
+
+//     for (int i = 0; i < 3; i++)
+//     {
+//         showrooms[i].showroom_id = i + 1;
+//         load_showroom_data(&showrooms[i], i + 1);
+
+//         printf("\n=== Showroom %d ===\n", i + 1);
+//         printf("Available Cars (VINs): ");
+//         traverse_available_car(showrooms[i].available_car_root);
+//         printf("\nSold Cars (VINs): ");
+//         traverse_sold_car(showrooms[i].sold_car_root);
+//         printf("\nSales Persons (IDs): ");
+//         traverse_sales_person(showrooms[i].sales_root);
+//         printf("\nCustomers (IDs): ");
+//         traverse_customer(showrooms[i].customer_root);
+//         printf("\n");
+//     }
+
+//     MergedCarTreeNode *mergedRoot = merge_showrooms(showrooms, 3);
+
+//     // Traverse the merged B-Tree and display VIN, model name, showroom number, and isSold flag.
+//     printf("\n--- Merged Car Data ---\n");
+//     traverse_merged_car(mergedRoot);
+
+//     find_most_popular_car_model(mergedRoot);
+
+//     SalesPerson top = find_top_sales_person(showrooms, 3);
+
+//     if (top.salesAchieved >= 0)
+//     {
+//         printf("\nTop Salesperson \n");
+//         printf("ID: %d\nName: %s\nSales: Rs.%.2f\nCommission: Rs.%.2f\n",
+//                top.id, top.name, top.salesAchieved, top.commission);
+//     }
+//     else
+//     {
+//         printf("\n No sales records found!\n");
+//     }
+
+//     // // Calculate extra incentive (1% of sales achieved)
+//     float extraIncentive = 0.01f * top.salesAchieved;
+//     printf("Extra Incentive (1%% bonus): %.2f\n", extraIncentive);
+
+//     int vin;
+//     printf("Enter VIN to search: ");
+//     scanf("%d", &vin);
+
+//     display_car_info(showrooms, vin);
+//     return 0;
+// }
