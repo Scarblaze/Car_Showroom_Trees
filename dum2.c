@@ -1825,7 +1825,7 @@ void append_sales_person(int showroom_id, SalesPerson *sp)
     }
 
     // Write all fields in the correct order matching your file format
-    fprintf(fp, "%d,%s,%.2f,%.2f,%.2f,%.2f\n",
+    fprintf(fp, "%d|%s|%.2f|%.2f|%.2f|%.2f\n",
             sp->id,
             sp->name,
             sp->salesTarget,
