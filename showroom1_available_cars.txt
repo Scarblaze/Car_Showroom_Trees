@@ -8,4 +8,3 @@ VIN|name|color|price|fuelType|carType
 1027|Toyota Innova|White|2500000|Diesel|SUV
 1028|MG Astor|Maroon|1500000|Petrol|SUV
 1029|Skoda Kushaq|Grey|1300000|Petrol|SUV
-1030|Volkswagen Taigun|Blue|1400000|Petrol|SUV

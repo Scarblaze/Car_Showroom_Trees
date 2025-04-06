@@ -8,4 +8,4 @@ id|name|mobile|address|soldCarVIN|registrationNumber|payment_type|downPayment|lo
 517|Devansh Sharma|3210004321|Coimbatore|2017|TN17GH4567|Cash|840000|0|0|0|0
 518|Pooja Saxena|2100003210|Vishakhapatnam|2018|AP18IJ8901|Loan|200000|48|8.3|13000|550000
 519|Varun Choudhary|1090002109|Mysore|2019|KA19KL2345|Cash|780000|0|0|0|0
-520|Simran Kaur|0980001098|Dehradun|2020|UK20MN5678|Loan|275000|36|7.6|14500|480000ID: 521, Name: Vinit, Mobile: 999999999, Address: Pune, Car VIN: 1030, Payment: Loan, Down: 123444.00, LoanMonths: 1, EMI: 1281875.00
+
