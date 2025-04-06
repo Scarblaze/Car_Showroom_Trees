@@ -1,10 +1,9 @@
 VIN|name|color|price|fuelType|carType
-1021|Fronx|Blue|850000|Petrol|SUV
-1022|Grand Vitara|White|1800000|Hybrid|SUV
-1023|Honda City|Silver|1200000|Petrol|Sedan
-1024|Hyundai Verna|Black|1100000|Diesel|Sedan
-1025|Kia Sonet|Red|950000|Petrol|SUV
-1026|Tata Harrier|Brown|1700000|Diesel|SUV
-1027|Toyota Innova|White|2500000|Diesel|SUV
-1028|MG Astor|Maroon|1500000|Petrol|SUV
-1029|Skoda Kushaq|Grey|1300000|Petrol|SUV
+1021|Fronx|Blue|850000.00|Petrol|SUV
+1022|Grand Vitara|White|1800000.00|Hybrid|SUV
+1024|Hyundai Verna|Black|1100000.00|Diesel|Sedan
+1025|Kia Sonet|Red|950000.00|Petrol|SUV
+1026|Tata Harrier|Brown|1700000.00|Diesel|SUV
+1027|Toyota Innova|White|2500000.00|Diesel|SUV
+1028|MG Astor|Maroon|1500000.00|Petrol|SUV
+1029|Skoda Kushaq|Grey|1300000.00|Petrol|SUV

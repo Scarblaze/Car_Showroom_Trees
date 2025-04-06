@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
+#include<time.h>
 
 #define ORDER 5
 #define MAX_KEYS (ORDER - 1)
@@ -1728,7 +1729,16 @@ void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer custom
     carToSell.isSold = true;
     carToSell.customer_id = customer.id;
     carToSell.salesperson_id = salespersonID;
-    strcpy(carToSell.soldDate, "2025-04-02");
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    char date_str[11]; // YYYY-MM-DD + null terminator
+
+    // Format the date as string
+    strftime(date_str, sizeof(date_str), "%Y-%m-%d", t);
+
+    // Use it in your car sale record
+    strcpy(carToSell.soldDate, date_str);
+    // strcpy(carToSell.soldDate, "2025-04-02");
 
     // Insert the car into the sold-car tree.
     insert_sold_car(&showroom->sold_car_root, carToSell);

@@ -9,3 +9,4 @@ VIN|name|color|price|fuelType|carType|customer_id|salesperson_id|soldDate
 2008|Venue|Red|850000|Diesel|SUV|508|108|2024-01-14
 2009|Altroz|Blue|700000|Petrol|Hatchback|509|109|2024-09-30
 2010|Punch|Orange|650000|Diesel|SUV|510|110|2024-10-25
+1008|Ciaz|White|900000.00|Petrol|Sedan|511|102|2025-04-06
