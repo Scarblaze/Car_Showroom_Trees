@@ -1483,46 +1483,108 @@ void update_customer_file(Showroom *showroom, Customer customer) {
     fclose(file);
 }
 
-void traverse_and_write_salespersons(SalesTreeNode *node, FILE *file) {
-    if (node == NULL) return;
-
-    int i;
-    for (i = 0; i < node->num_keys; i++) {
-        // Traverse left child first
-        if (node->children[0]) {
-            traverse_and_write_salespersons(node->children[i], file);
-        }
-        // Write current salesperson to file
-        fprintf(file, "%d|%s|%.2f|%.2f|%.2f|%.2f\n",
-                node->keys[i].id,
-                node->keys[i].name,
-                node->keys[i].salesTarget,
-                node->keys[i].salesAchieved,
-                node->keys[i].totalSales,
-                node->keys[i].commission);
-    }
-    // Traverse rightmost child
-    if (node->children[0]) {
-        traverse_and_write_salespersons(node->children[i], file);
-    }
-}
-
-void update_salesperson_file(Showroom *showroom, SalesPerson *sp) {
+void update_salesperson_file(Showroom *showroom, SalesPerson *updatedSp) {
     char filename[50];
     sprintf(filename, "showroom%d_salesperson.txt", showroom->showroom_id);
-    FILE *file = fopen(filename, "w");
-    if (!file) {
-        perror("Failed to update salesperson file");
+    
+    // Create a temporary file for writing
+    char tempFilename[60];
+    sprintf(tempFilename, "showroom%d_salesperson_temp.txt", showroom->showroom_id);
+    FILE *tempFile = fopen(tempFilename, "w");
+    if (!tempFile) {
+        perror("Failed to create temporary salesperson file");
         return;
     }
 
     // Write header
-    fprintf(file, "id|name|salesTarget|salesAchieved|totalSales|commission\n");
+    fprintf(tempFile, "id|name|salesTarget|salesAchieved|totalSales|commission\n");
+
+    // Traverse the sales tree and write all records
+    SalesTreeNode *node = showroom->sales_root;
+    if (node) {
+        // Stack for iterative traversal
+        SalesTreeNode *stack[100];
+        int top = -1;
+        stack[++top] = node;
+
+        while (top >= 0) {
+            node = stack[top--];
+            
+            // Process current node's keys
+            for (int i = 0; i < node->num_keys; i++) {
+                // Write left child first if exists
+                if (node->children[i]) {
+                    stack[++top] = node->children[i];
+                }
+                
+                // Write the salesperson record
+                SalesPerson *sp = &node->keys[i];
+                if (sp->id == updatedSp->id) {
+                    // Use the updated values for the matching salesperson
+                    fprintf(tempFile, "%d|%s|%.2f|%.2f|%.2f|%.2f\n",
+                            updatedSp->id,
+                            updatedSp->name,
+                            updatedSp->salesTarget,
+                            updatedSp->salesAchieved,
+                            updatedSp->totalSales,
+                            updatedSp->commission);
+                } else {
+                    // Write original values for other salespersons
+                    fprintf(tempFile, "%d|%s|%.2f|%.2f|%.2f|%.2f\n",
+                            sp->id,
+                            sp->name,
+                            sp->salesTarget,
+                            sp->salesAchieved,
+                            sp->totalSales,
+                            sp->commission);
+                }
+            }
+            
+            // Push rightmost child if exists
+            if (node->children[node->num_keys]) {
+                stack[++top] = node->children[node->num_keys];
+            }
+        }
+    }
+
+    fclose(tempFile);
+
+    // Replace the original file with the temporary file
+    remove(filename);
+    rename(tempFilename, filename);
+}
+
+void update_sales_person_in_tree(SalesTreeNode **root, SalesPerson updatedSp) {
+    if (*root == NULL) {
+        return;
+    }
+
+    SalesTreeNode *current = *root;
+    while (current != NULL) {
+        int i;
+        for (i = 0; i < current->num_keys; i++) {
+            // If we found the salesperson to update
+            if (current->keys[i].id == updatedSp.id) {
+                // Update only the sales metrics (not the ID or name)
+                current->keys[i].salesTarget = updatedSp.salesTarget;
+                current->keys[i].salesAchieved = updatedSp.salesAchieved;
+                current->keys[i].totalSales = updatedSp.totalSales;
+                current->keys[i].commission = updatedSp.commission;
+                return;
+            }
+            
+            // If the ID we're looking for is smaller, go to left child
+            if (updatedSp.id < current->keys[i].id) {
+                break;
+            }
+        }
+        
+        // Move to appropriate child node
+        current = current->children[i];
+    }
     
-    // Write all salespersons
-    traverse_and_write_salespersons(showroom->sales_root, file);
-    
-    fclose(file);
+    // If we get here, the salesperson wasn't found
+    printf("Warning: Salesperson ID %d not found in tree for update\n", updatedSp.id);
 }
 
 // Finds a car in the available tree by VIN.
@@ -1570,10 +1632,19 @@ void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer custom
         printf("Salesperson with ID %d not found.\n", salespersonID);
         return;
     }
-    sp->salesAchieved += carToSell.price;
-    sp->totalSales += carToSell.price;
-    sp->commission = 0.02f * sp->salesAchieved;
-    update_salesperson_file(showroom, sp);
+
+    // Create a copy with updated sales metrics
+    SalesPerson updatedSp = *sp;
+    updatedSp.salesAchieved += carToSell.price;
+    updatedSp.totalSales += carToSell.price;
+    updatedSp.commission = 0.02f * updatedSp.salesAchieved;
+
+    // Update the tree (you'll need an update function in your B-tree implementation)
+    update_sales_person_in_tree(&showroom->sales_root, updatedSp);
+
+    // Update the file
+    update_salesperson_file(showroom, &updatedSp);
+
 
     // Insert the customer record into the customer tree.
     insert_customer(&showroom->customer_root, customer);

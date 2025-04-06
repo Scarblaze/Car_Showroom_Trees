@@ -10,4 +10,4 @@ VIN|name|color|price|fuelType|carType|customer_id|salesperson_id|soldDate
 2029|Ignis|Green|700000|Petrol|Hatchback|529|119|2025-05-15
 2030|Jimny|Red|1500000|Petrol|SUV|530|120|2025-06-30
 1018|Safari|Blue|2100000.00|Diesel|SUV|531|120|2025-04-02
-
+1020|Scorpio|White|1700000.00|Diesel|SUV|532|118|2025-04-02

@@ -7,4 +7,3 @@ VIN|name|color|price|fuelType|carType
 1016|Kiger|Grey|780000.00|Petrol|SUV
 1017|Harrier|Orange|1900000.00|Diesel|SUV
 1019|Thar|Black|1800000.00|Diesel|SUV
-1020|Scorpio|White|1700000.00|Diesel|SUV
