@@ -1167,7 +1167,7 @@ void find_most_popular_car_model(MergedCarTreeNode *mergedRoot)
         return;
     }
 
-    // Find the model with the maximum count.
+    // model with the maximum count.
     int maxIndex = 0;
     for (int i = 1; i < numModels; i++)
     {
@@ -1185,7 +1185,7 @@ SalesPerson default_sales_person()
     return sp;
 }
 
-// Revised recursive search function
+
 SalesPerson find_top_in_sales_tree(SalesTreeNode *node)
 {
     SalesPerson best = default_sales_person();
@@ -1219,7 +1219,6 @@ SalesPerson find_top_in_sales_tree(SalesTreeNode *node)
     return best;
 }
 
-// Revised top salesperson finder
 SalesPerson find_top_sales_person(Showroom *showrooms, int count)
 {
     SalesPerson overall_best = default_sales_person();
@@ -1430,8 +1429,7 @@ bool remove_car_from_available(AvailableCarTreeNode **root, int carVIN, Car *rem
             *removedCar = node->keys[idx];
 
         if (!node->children[0])
-        { // Leaf node
-            // Simple deletion from leaf
+        { 
             for (int i = idx; i < node->num_keys - 1; i++)
                 node->keys[i] = node->keys[i + 1];
             node->num_keys--;
