@@ -10,3 +10,4 @@ VIN|name|color|price|fuelType|carType|customer_id|salesperson_id|soldDate
 2019|XUV700|White|2200000|Petrol|SUV|519|129|2024-08-25
 2020|Swift|Brown|1900000|Diesel|SUV|520|130|2024-08-11
 1023|Honda City|Silver|1200000.00|Petrol|Sedan|520|123|2025-04-02
+1022|Grand Vitara|White|1800000.00|Hybrid|SUV|521|125|2025-04-08
