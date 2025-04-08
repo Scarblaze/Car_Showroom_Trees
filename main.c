@@ -110,7 +110,6 @@ typedef struct
     int count;
 } ModelCount;
 
-// Updated: customer_root is now of type CustomerTreeNode *
 typedef struct Showroom
 {
     int showroom_id;
@@ -597,7 +596,7 @@ void insert_sales_person(SalesTreeNode **root, SalesPerson key)
     insert_non_full_sales_person(*root, key);
 }
 
-// Function to load available cars from file for a specific showroom
+
 void load_available_cars_from_file(AvailableCarTreeNode **root, const char *filename)
 {
     FILE *file = fopen(filename, "r");
@@ -672,7 +671,7 @@ void load_available_cars_from_file(AvailableCarTreeNode **root, const char *file
     fclose(file);
 }
 
-// Function to load sold cars from file for a specific showroom
+
 void load_sold_cars_from_file(SoldCarTreeNode **root, const char *filename)
 {
     FILE *file = fopen(filename, "r");
@@ -699,7 +698,7 @@ void load_sold_cars_from_file(SoldCarTreeNode **root, const char *filename)
         if (strlen(line) == 0)
             continue; // Skip empty lines
 
-        Car car = {0}; // Initialize all fields
+        Car car = {0}; 
         char *token = strtok(line, "|");
         if (!token)
             continue;
@@ -745,7 +744,7 @@ void load_sold_cars_from_file(SoldCarTreeNode **root, const char *filename)
             continue;
         strncpy(car.soldDate, token, sizeof(car.soldDate) - 1);
 
-        // Ensure null-termination
+  
         car.name[sizeof(car.name) - 1] = '\0';
         car.color[sizeof(car.color) - 1] = '\0';
         car.fuelType[sizeof(car.fuelType) - 1] = '\0';
@@ -910,7 +909,6 @@ void load_customers_from_file(CustomerTreeNode **root, const char *filename)
             customer.loanAmount = atof(token);
         }
 
-        // Ensure null-termination
         customer.name[sizeof(customer.name) - 1] = '\0';
         customer.mobile[sizeof(customer.mobile) - 1] = '\0';
         customer.address[sizeof(customer.address) - 1] = '\0';
@@ -995,7 +993,7 @@ void split_child_merged_car(MergedCarTreeNode *parent, int child_index)
 void insert_non_full_merged_car(MergedCarTreeNode *node, MergedCar key)
 {
     int i = node->num_keys - 1;
-    // Since we sort by VIN, compare key.car.VIN.
+    
     if (node->children[0] == NULL)
     {
         while (i >= 0 && key.car.VIN < node->keys[i].car.VIN)
@@ -1064,9 +1062,7 @@ void traverse_merged_car(MergedCarTreeNode *node)
         traverse_merged_car(node->children[i]);
 }
 
-// --- Helper callback functions to merge cars ---
-// These functions traverse an existing B-Tree (available or sold) and insert each car into the merged tree.
-// They take the showroom_id as an extra parameter.
+
 
 void traverse_available_car_for_merge(AvailableCarTreeNode *node, int showroom_id, MergedCarTreeNode **mergedRoot)
 {
@@ -1104,8 +1100,8 @@ void traverse_sold_car_for_merge(SoldCarTreeNode *node, int showroom_id, MergedC
         traverse_sold_car_for_merge(node->children[i], showroom_id, mergedRoot);
 }
 
-// --- Merge function ---
-// This function goes through each showroom's available and sold trees
+
+// function goes through each showroom's available and sold trees
 // and inserts every car into a new merged B-Tree.
 MergedCarTreeNode *merge_showrooms(Showroom showrooms[], int numShowrooms)
 {
@@ -1120,7 +1116,7 @@ MergedCarTreeNode *merge_showrooms(Showroom showrooms[], int numShowrooms)
     return mergedRoot;
 }
 
-// Function to update the count for a given model name.
+//  update the count for a given model name.
 void update_model_count(ModelCount models[], int *numModels, const char *modelName)
 {
     for (int i = 0; i < *numModels; i++)
@@ -1137,7 +1133,7 @@ void update_model_count(ModelCount models[], int *numModels, const char *modelNa
     (*numModels)++;
 }
 
-// Recursively traverse the merged B-Tree and update counts for sold cars.
+// traverse the merged B-Tree and update counts for sold cars.
 void traverse_and_count_merged(MergedCarTreeNode *node, ModelCount models[], int *numModels)
 {
     if (node == NULL)
@@ -1182,7 +1178,6 @@ void find_most_popular_car_model(MergedCarTreeNode *mergedRoot)
     printf("\nMost Popular Car Model: %s (Sold %d times)\n", models[maxIndex].model, models[maxIndex].count);
 }
 
-// Helper function to initialize a default SalesPerson
 SalesPerson default_sales_person()
 {
     SalesPerson sp = {0};
@@ -1244,7 +1239,7 @@ SalesPerson find_top_sales_person(Showroom *showrooms, int count)
     return overall_best;
 }
 
-// Helper: Search for a salesperson in the sales B-Tree.
+
 SalesPerson *find_sales_person(SalesTreeNode *node, int salespersonID)
 {
     if (node == NULL)
@@ -1263,8 +1258,8 @@ SalesPerson *find_sales_person(SalesTreeNode *node, int salespersonID)
     return NULL;
 }
 
-// Borrow a key from the right sibling
-// Helper to find the predecessor (rightmost key in left subtree)
+
+// find the predecessor (rightmost key in left subtree)
 Car get_predecessor(AvailableCarTreeNode *node, int pos)
 {
     AvailableCarTreeNode *curr = node->children[pos];
@@ -1273,7 +1268,7 @@ Car get_predecessor(AvailableCarTreeNode *node, int pos)
     return curr->keys[curr->num_keys - 1];
 }
 
-// Helper to find the successor (leftmost key in right subtree)
+//  find the successor (leftmost key in right subtree)
 Car get_successor(AvailableCarTreeNode *node, int pos)
 {
     AvailableCarTreeNode *curr = node->children[pos + 1];
@@ -1416,7 +1411,6 @@ void remove_from_non_leaf(AvailableCarTreeNode *node, int idx)
     }
 }
 
-// Main deletion function (fixed type consistency)
 bool remove_car_from_available(AvailableCarTreeNode **root, int carVIN, Car *removedCar)
 {
     if (!*root)
@@ -1479,7 +1473,6 @@ void traverse_and_write_available_cars(AvailableCarTreeNode *node, FILE *file)
     int i;
     for (i = 0; i < node->num_keys; i++)
     {
-        // Traverse left child first (for in-order traversal)
         if (node->children[0])
         {
             traverse_and_write_available_cars(node->children[i], file);
@@ -1493,7 +1486,7 @@ void traverse_and_write_available_cars(AvailableCarTreeNode *node, FILE *file)
                 node->keys[i].fuelType,
                 node->keys[i].carType);
     }
-    // Traverse the last child (rightmost)
+    // (rightmost)
     if (node->children[0])
     {
         traverse_and_write_available_cars(node->children[i], file);
@@ -1511,10 +1504,10 @@ void update_available_cars_file(Showroom *showroom)
         return;
     }
 
-    // Write header
+    
     fprintf(file, "VIN|name|color|price|fuelType|carType\n");
 
-    // Write all cars using in-order traversal
+    // all cars using in-order traversal
     traverse_and_write_available_cars(showroom->available_car_root, file);
 
     fclose(file);
@@ -1584,10 +1577,10 @@ void update_salesperson_file(Showroom *showroom, SalesPerson *updatedSp)
         return;
     }
 
-    // Write header
+    //  header
     fprintf(tempFile, "id|name|salesTarget|salesAchieved|totalSales|commission\n");
 
-    // Traverse the sales tree and write all records
+    // all records
     SalesTreeNode *node = showroom->sales_root;
     if (node)
     {
@@ -1603,17 +1596,17 @@ void update_salesperson_file(Showroom *showroom, SalesPerson *updatedSp)
             // Process current node's keys
             for (int i = 0; i < node->num_keys; i++)
             {
-                // Write left child first if exists
+                //  child first if exists
                 if (node->children[i])
                 {
                     stack[++top] = node->children[i];
                 }
 
-                // Write the salesperson record
+                // salesperson record
                 SalesPerson *sp = &node->keys[i];
                 if (sp->id == updatedSp->id)
                 {
-                    // Use the updated values for the matching salesperson
+                    
                     fprintf(tempFile, "%d|%s|%.2f|%.2f|%.2f|%.2f\n",
                             updatedSp->id,
                             updatedSp->name,
@@ -1624,7 +1617,7 @@ void update_salesperson_file(Showroom *showroom, SalesPerson *updatedSp)
                 }
                 else
                 {
-                    // Write original values for other salespersons
+                    //original values for other salespersons
                     fprintf(tempFile, "%d|%s|%.2f|%.2f|%.2f|%.2f\n",
                             sp->id,
                             sp->name,
@@ -1666,7 +1659,7 @@ void update_sales_person_in_tree(SalesTreeNode **root, SalesPerson updatedSp)
             // If we found the salesperson to update
             if (current->keys[i].id == updatedSp.id)
             {
-                // Update only the sales metrics (not the ID or name)
+                // Update only the sales metrics 
                 current->keys[i].salesTarget = updatedSp.salesTarget;
                 current->keys[i].salesAchieved = updatedSp.salesAchieved;
                 current->keys[i].totalSales = updatedSp.totalSales;
@@ -1674,14 +1667,14 @@ void update_sales_person_in_tree(SalesTreeNode **root, SalesPerson updatedSp)
                 return;
             }
 
-            // If the ID we're looking for is smaller, go to left child
+            // If the ID we're looking for is smaller -> to left child
             if (updatedSp.id < current->keys[i].id)
             {
                 break;
             }
         }
 
-        // Move to appropriate child node
+        // -> appropriate child node
         current = current->children[i];
     }
 
@@ -1692,7 +1685,7 @@ void update_sales_person_in_tree(SalesTreeNode **root, SalesPerson updatedSp)
 // Finds a car in the available tree by VIN.
 Car *find_in_available(AvailableCarTreeNode *root, int carVIN)
 {
-    // For simplicity, we do an in-order search.
+    
     if (root == NULL)
         return NULL;
     for (int i = 0; i < root->num_keys; i++)
@@ -1725,7 +1718,7 @@ void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer custom
         return;
     }
 
-    // Update the car's details to reflect the sale.
+
     carToSell.isSold = true;
     carToSell.customer_id = customer.id;
     carToSell.salesperson_id = salespersonID;
@@ -1733,12 +1726,12 @@ void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer custom
     struct tm *t = localtime(&now);
     char date_str[11]; // YYYY-MM-DD + null terminator
 
-    // Format the date as string
+
     strftime(date_str, sizeof(date_str), "%Y-%m-%d", t);
 
-    // Use it in your car sale record
+    
     strcpy(carToSell.soldDate, date_str);
-    // strcpy(carToSell.soldDate, "2025-04-02");
+
 
     // Insert the car into the sold-car tree.
     insert_sold_car(&showroom->sold_car_root, carToSell);
@@ -1758,7 +1751,6 @@ void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer custom
     updatedSp.totalSales += carToSell.price;
     updatedSp.commission = 0.02f * updatedSp.salesAchieved;
 
-    // Update the tree (you'll need an update function in your B-tree implementation)
     update_sales_person_in_tree(&showroom->sales_root, updatedSp);
 
     // Update the file
@@ -1778,7 +1770,6 @@ void sell_car(Showroom *showroom, int carVIN, int salespersonID, Customer custom
         }
     }
 
-    // After removal, update available cars file.
     update_available_cars_file(showroom);
 
     printf("Car with VIN %d sold to Customer ID %d by Salesperson ID %d.\n",
@@ -1912,7 +1903,6 @@ int print_emi_customers(CustomerTreeNode *root)
     return count;
 }
 
-// Search function using existing traversal logic
 SalesPerson *search_sales_person(SalesTreeNode *node, int id)
 {
     if (node == NULL)
@@ -1944,7 +1934,7 @@ void append_sales_person(int showroom_id, SalesPerson *sp)
         return;
     }
 
-    // Write all fields in the correct order matching your file format
+ 
     fprintf(fp, "%d|%s|%.2f|%.2f|%.2f|%.2f\n",
             sp->id,
             sp->name,
@@ -1956,7 +1946,6 @@ void append_sales_person(int showroom_id, SalesPerson *sp)
     fclose(fp);
 }
 
-// Complete add_sales_person function
 void add_sales_person(Showroom showrooms[3])
 {
     int showroom_num;
@@ -2349,7 +2338,7 @@ int main()
         printf("6. List Customers with EMI 36-48 Months\n");
         printf("7. Add New Sales Person\n");
         printf("8. Search Salesperson in Range\n");
-        printf("9. Process Car Sale\n"); // New option
+        printf("9. Process Car Sale\n"); 
         printf("10. Sales Prediction\n");
         printf("11. Exit\n");
         printf("Enter your choice: ");
@@ -2483,7 +2472,7 @@ int main()
             scanf("%d", &salespersonID);
 
             printf("Enter Customer Name: ");
-            scanf(" %49[^\n]", customerName); // Read up to 49 characters to avoid overflow
+            scanf(" %49[^\n]", customerName); 
 
             printf("Enter Mobile Number: ");
             scanf(" %14s", mobile);
