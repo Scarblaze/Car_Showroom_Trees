@@ -1,50 +1,114 @@
-Implementation of Car Management System, entirely in B-Trees.
+# 🚗 Car Showroom Management System (Using B-Trees)
 
-Problem Statement:
+This is a C-based simulation of a Car Showroom Management System implemented entirely using **B-Trees** for efficient record management and search operations.
 
-Car Showroom Management System Using Trees 
-Stock details in individual showroom: 
-Number of car models with details like “Name of car, Colour of car, Price of car, Fuel type of 
-car and Type of car” (Hatchback, Sedan or SUV). Maintain the VIN (Vehicle Identification 
-Number) as a primary key for each car.  
-1. Number of sold cars. 
-2. Number of available cars. 
-Note: Count of cars should increment and decrement in the tree of sold cars and available cars 
-respectively as per the car sale. Maintain separate tree for car showroom. Root of tree should 
-be unique id. 
-Sales person in individual showroom: 
-Sales person can login and search the details of the stock and customer. Sales person will 
-maintain the record of sold car and its respective customer. Details of sales person is “Id and 
-Name”. 
-1. Sales person sales target. (50 lakhs rupees/Month) 
-2. Sales person sales achieved. (Rupees in lakhs) 
-3. Sales person commission is 2% of sales achieved. 
-Note: Sales person will access data from stock details and customer details tree. Maintain 
-separate tree for sales persons. Root of tree should be showroom id. 
-Customer details in individual showroom: 
-The sales person will keep record of the customer details like Name of customer, Mobile No. 
-of customer, Address of customer, Sold car (VIN) and Car registration number in a tree. 
-The sales person will also keep the record of sold cars like Car (VIN) and Payment type 
-(Cash/Loan) in another tree. If car is purchased on loan, then following is the criteria. 
-1. Down payment should be greater than 20% of car price. 
-2. 9.00% rate of interest for 84 months EMI. 
-3. 8.75% rate of interest for 60 months EMI. 
-4. 8.50% rate of interest for 36 months EMI. 
-Note: Maintain separate tree for customers. Root of tree should be sales person id. 
-A. Assume there are three showrooms of different car manufacturer. Maintain the database 
-for all and write a function with input name of to merge them together and sort by VIN. 
-B. Write a function with input details of sales person to add new sales person. 
-C. Find the most popular car among all three showrooms. 
-D. Find the most successful sales person according to sales. Award him/her with 1% extra 
-incentives as per sales achieved and print the same. 
-E. Write a function with input details of sales person and customer to sale the car to 
-customer. 
-F. Based on previous month’s sales figures, predict the next month sales. 
-G. Write a function with one argument (VIN) which will display all information of car 
-even if it is in stock or sold. 
-H. Search the range of sales person who have achieved sales target within given range of 
-values (min_sales, max_sales). 
-I. Print list of customers having EMI plan for less than 48 months but greater than 36 
-months. 
-Used B tree to maintain all database. 
-Populate sufficient initial dataset with file handling to test all test cases.
+---
+
+## 📌 Problem Overview
+
+The system maintains and manages the following entities using **B-Trees**:
+
+1. **Car Stock (Available & Sold Cars)** — Indexed by `VIN`
+2. **Salespersons** — Indexed by `Salesperson ID`
+3. **Customers** — Indexed by `Customer ID`
+4. **Sold Car Records** — Indexed by `VIN`
+
+Each showroom, salesperson, customer, and vehicle is uniquely identified. The system supports all major operations like buying/selling cars, updating stock, predicting showroom sales, and searching across B-Trees.
+
+---
+
+## 🛠 Features
+
+### 🚘 Cars
+- Each car has:
+  - `VIN` (Primary Key)
+  - `Name`, `Colour`, `Price`, `Fuel Type`, `Car Type (Hatchback/Sedan/SUV)`
+- Maintains:
+  - **Available Cars Tree**
+  - **Sold Cars Tree**
+  - Increment/decrement stock on sale
+
+### 🧑‍💼 Salespersons
+- Each has:
+  - `Salesperson ID` (Primary Key)
+  - `Name`
+  - Monthly sales target (₹50 Lakhs)
+  - Achieved sales (in ₹ Lakhs)
+  - Commission (2% of achieved sales)
+- **Salesperson Tree** maintained per showroom
+
+### 👥 Customers
+- Each customer record includes:
+  - `Name`, `Mobile`, `Address`
+  - `Sold Car VIN`, `Car Registration Number`
+  - `Payment Type` (Cash/Loan)
+  - EMI info (if applicable)
+- Maintains a separate **Customer Tree**
+
+---
+
+## 💸 Loan/EMI Criteria
+
+- **Down payment** must be > 20% of car price
+- **Interest Rates**:
+  - 9.00% for 84 months
+  - 8.75% for 60 months
+  - 8.50% for 36 months
+
+---
+
+## 🧮 Core Functionalities
+
+### A. `mergeShowrooms()`  
+Merge all three showroom B-Trees and sort by `VIN`.
+
+### B. `addSalesperson(details)`  
+Add a new salesperson with given info.
+
+### C. `mostPopularCar()`  
+Identify and return the most sold car across all showrooms.
+
+### D. `topSalesperson()`  
+Find the most successful salesperson based on sales achieved. Award extra 1% incentive and display total.
+
+### E. `sellCar(salesperson_id, customer_details)`  
+Complete a car sale transaction and update all related B-Trees:
+- Decrease available cars
+- Add to sold cars
+- Update salesperson's sales
+- Add customer record
+- Create loan record if needed
+
+### F. `predictNextMonthSales()`  
+Estimate next month’s sales using last month’s data (simple trend projection).
+
+### G. `getCarByVIN(VIN)`  
+Display complete details of a car (whether sold or available).
+
+### H. `searchSalespersonBySales(min_sales, max_sales)`  
+Find salespersons whose sales lie in the given range.
+
+### I. `listCustomersByEMI()`  
+List customers with EMI plans > 36 months and < 48 months.
+
+---
+
+## 🧱 Data Structures
+
+- All major entities are managed via **B-Trees** for fast insertion and deletion.
+- Custom implementation of B-Trees for:
+  - Cars (by `VIN`)
+  - Customers (by `Customer ID`)
+  - Salespersons (by `Salesperson ID`)
+
+---
+
+## 🗃 File Handling
+
+- Initial dataset populated from files:
+  - `showroom1_available_cars.txt`, `showroom1_sold_cars.txt`, `showroom1_customers.txt`, `showroom1_salesperson.txt`
+  - There are 3 such showrooms
+- Supports persistent read/write to simulate real-time data
+
+---
+
